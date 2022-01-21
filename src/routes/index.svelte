@@ -1,30 +1,85 @@
-<main class="h-100 w-100 p-4 bg-gunmetal">
-	<header class="flex justify-between items-center">
-        <a href="/" class="h-8 w-12 border-white border-2 flex justify-center items-center hover:bg-slate-500">Edd</a>
+<script>
+    function handleOpenMenu() {
+        console.log('openning menu');
+		// document.querySelector("#hidden-menu").classList.add('translate-none');
+        document.querySelector("#hidden-menu").classList.remove("translate-x-full");
+	}
+
+    function handleCloseMenu() {
+        console.log('closing menu');
+        document.querySelector("#hidden-menu").classList.add("translate-x-full");
+    }
+</script>
+
+<!-- This might not need to be main -->
+<main class="h-full w-full p-4 min-h-screen flex flex-col bg-gunmetal relative overflow-hidden">
+    <div id="hidden-menu" class="absolute transition-transform duration-300 h-screen w-screen inset-0 z-10 translate-x-full bg-bdazzled-blue-700">
+        <button on:click={handleCloseMenu}>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+        </button>
         <nav>
-            <ul class="list-none flex gap-2">
-                <li class="h-8 w-auto px-2 flex justify-center items-center border-2 border-transparent hover:border-white"><a href="#about">About</a></li>
-                <li class="h-8 w-auto px-2 flex justify-center items-center border-2 border-transparent hover:border-white"><a href="#experience">Experience</a></li>
-                <li class="h-8 w-auto px-2 flex justify-center items-center border-2 border-transparent hover:border-white"><a href="#work">Work</a></li>
-                <li class="h-8 w-auto px-2 flex justify-center items-center border-2 border-transparent hover:border-white"><a href="#contact">Contact</a></li>
+            <ul class="list-none flex flex-col sm:hidden">
+                <li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2"><a href="#about">About</a></li>
+                <li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2"><a href="#experience">Experience</a></li>
+                <li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2"><a href="#work">Work</a></li>
+                <li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2"><a href="#contact">Contact</a></li>
+                <li class="h-8 w-auto flex justify-center items-center hover:bg-bdazzled-blue-500">
+                    <a href="#" class="w-12 border-white border-2 flex justify-center items-center">CV</a>
+                </li>
             </ul>
         </nav>
+    </div>
+
+    <header class="flex justify-between items-center relative">
+        <a href="/" class="h-8 w-12 border-white border-2 flex justify-center items-center hover:bg-bdazzled-blue-500">Edd</a>
+        
+            <!-- Mobile -->
+        <button on:click={handleOpenMenu}>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+        </button>
+        
+        <!-- Regular -->
+        <!-- <ul class="list-none flex gap-2 ">
+            <li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2"><a href="#about">About</a></li>
+            <li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2"><a href="#experience">Experience</a></li>
+            <li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2"><a href="#work">Work</a></li>
+            <li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2"><a href="#contact">Contact</a></li>
+            <li class="h-8 w-auto border-white border-2 flex justify-center items-center hover:bg-bdazzled-blue-500">
+                <a class="w-12" href="#">CV</a>
+            </li>
+        </ul> -->
+        
     </header>
 
-    <div class="flex flex-col gap-4 justify-center">
-        <section id="banner" class="w-100 h-96 p-24 flex items-start text-2xl flex-col justify-center">
+    <!-- Main Content -->
+    <div class="flex-grow flex flex-col  gap-4 justify-center">
+        
+        <section id="banner" class="w-full h-full min-h-fit flex-1 flex-grow text-2xl flex items-center flex-col justify-center p-4 sm:p-24">
             <h1 class="flex flex-col gap-2">
                 <span class="text-base font-mono font-thin">Hi 👋<br></span>
                 <span class="text-4xl text-burnt-sienna">I'm Edd <br></span>
-                <span class="text-3xl flex flex-col gap-2 text-light-cyan">
-                    I build things online 
-                    <span class=" inline-block ml-16">on raspberry pis</span> 
-                    <span class=" inline-block ml-24">and sometimes in reality</span>
+                <span class="text-3xl flex-col gap-2 text-light-cyan">
+                    I build cool things 
                 </span>
+                <div class="flex text-3xl text-light-cyan">
+                    <span class="ml-[94px] h-9 overflow-hidden inline-block">
+                        <ul class="transform-gpu animate-translate-scroll hover:[animation-play-state:paused]">
+                            <li>for the web 🌐</li>
+                            <li>with batteries 🔋</li>
+                            <li class="flex items-center">on bitcoin 
+                                <svg class="inline ml-2" xmlns="http://www.w3.org/2000/svg" width="32" height="32"><g fill="none" fill-rule="evenodd"><circle cx="16" cy="16" r="16" fill="#F7931A"/><path fill="#FFF" fill-rule="nonzero" d="M23.189 14.02c.314-2.096-1.283-3.223-3.465-3.975l.708-2.84-1.728-.43-.69 2.765c-.454-.114-.92-.22-1.385-.326l.695-2.783L15.596 6l-.708 2.839c-.376-.086-.746-.17-1.104-.26l.002-.009-2.384-.595-.46 1.846s1.283.294 1.256.312c.7.175.826.638.805 1.006l-.806 3.235c.048.012.11.03.18.057l-.183-.045-1.13 4.532c-.086.212-.303.531-.793.41.018.025-1.256-.313-1.256-.313l-.858 1.978 2.25.561c.418.105.828.215 1.231.318l-.715 2.872 1.727.43.708-2.84c.472.127.93.245 1.378.357l-.706 2.828 1.728.43.715-2.866c2.948.558 5.164.333 6.097-2.333.752-2.146-.037-3.385-1.588-4.192 1.13-.26 1.98-1.003 2.207-2.538zm-3.95 5.538c-.533 2.147-4.148.986-5.32.695l.95-3.805c1.172.293 4.929.872 4.37 3.11zm.535-5.569c-.487 1.953-3.495.96-4.47.717l.86-3.45c.975.243 4.118.696 3.61 2.733z"/></g></svg>
+                            </li>
+                        </ul>
+                    </span>
+                </div>
             </h1>
         </section>
 
-        <section id="about" class="w-10/12">
+        <!-- <section id="about">
             <h2 class="underline">About Edd</h2>
             <p>I'm Edd 👋</p>
         </section>
@@ -33,6 +88,6 @@
         
         <section id="work"></section>
         
-        <section id="contact"></section>
+        <section id="contact"></section> -->
     </div>
 </main>
