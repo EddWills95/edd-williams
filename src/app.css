@@ -1,0 +1,26 @@
+/* Write your global styles here, in PostCSS syntax */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    --bdazzled-blue: #3d5a80ff;
+    --pale-cerulean: #98c1d9ff;
+    --light-cyan: #e0fbfcff;
+    --burnt-sienna: #ee6c4dff;
+    --gunmetal: #293241ff;
+
+    /* --rich-black: #023c40ff;
+--tuscany: #c3979fff;
+--vivid-sky-blue: #0ad3ffff;
+--aquamarine: #78ffd6ff;
+--light-cyan: #e1faf9ff; */
+
+    font-family: 'Raleway', sans-serif;
+
+    scroll-behavior: smooth;
+
+    color: white;
+
+    box-sizing: border-box;
+}
