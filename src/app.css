@@ -3,6 +3,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     --bdazzled-blue: #3d5a80ff;
     --pale-cerulean: #98c1d9ff;
@@ -27,4 +31,25 @@ body {
 
 .rounded-button {
     @apply px-2 border-2 rounded-sm flex justify-center items-center hover:bg-bdazzled-blue-500;
+}
+
+.base-section {
+    @apply w-full h-full min-h-screen p-4 flex flex-col sm:p-12 sm:w-10/12 text-lg;
+}
+
+.offset-border {
+    @apply relative z-10 before:transition-all before:-z-10 before:bg-burnt-sienna-400 before:top-2 before:left-2 before:absolute before:w-48 before:h-48 before:border-2 before:rounded hover:before:top-4 hover:before:left-4;
+}
+
+.section-break {
+    @apply block border-t-pale-cerulean border-t-2 text-pale-cerulean overflow-visible h-1 w-10/12 m-auto;
+}
+
+.section-break::after {
+    @apply bg-gunmetal;
+    content: 'E';
+    padding: 0 4px;
+    position: relative;
+    left: 50%;
+    top: -13px;
 }
