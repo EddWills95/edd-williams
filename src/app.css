@@ -24,3 +24,7 @@ body {
 
     box-sizing: border-box;
 }
+
+.rounded-button {
+    @apply px-2 border-2 rounded-sm flex justify-center items-center hover:bg-bdazzled-blue-500;
+}

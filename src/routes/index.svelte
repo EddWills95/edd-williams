@@ -1,64 +1,15 @@
 <script>
-    function handleOpenMenu() {
-        console.log('openning menu');
-		// document.querySelector("#hidden-menu").classList.add('translate-none');
-        document.querySelector("#hidden-menu").classList.remove("translate-x-full");
-	}
-
-    function handleCloseMenu() {
-        console.log('closing menu');
-        document.querySelector("#hidden-menu").classList.add("translate-x-full");
-    }
+import Header from "../components/header.svelte";
 </script>
 
 <!-- This might not need to be main -->
-<main class="h-full w-full p-4 min-h-screen flex flex-col bg-gunmetal relative overflow-hidden">
-    <div id="hidden-menu" class="absolute transition-transform duration-300 h-screen w-screen inset-0 z-10 translate-x-full bg-bdazzled-blue-700">
-        <button on:click={handleCloseMenu}>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-        </button>
-        <nav>
-            <ul class="list-none flex flex-col sm:hidden">
-                <li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2"><a href="#about">About</a></li>
-                <li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2"><a href="#experience">Experience</a></li>
-                <li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2"><a href="#work">Work</a></li>
-                <li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2"><a href="#contact">Contact</a></li>
-                <li class="h-8 w-auto flex justify-center items-center hover:bg-bdazzled-blue-500">
-                    <a href="#" class="w-12 border-white border-2 flex justify-center items-center">CV</a>
-                </li>
-            </ul>
-        </nav>
-    </div>
-
-    <header class="flex justify-between items-center relative">
-        <a href="/" class="h-8 w-12 border-white border-2 flex justify-center items-center hover:bg-bdazzled-blue-500">Edd</a>
-        
-            <!-- Mobile -->
-        <button on:click={handleOpenMenu}>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-        </button>
-        
-        <!-- Regular -->
-        <!-- <ul class="list-none flex gap-2 ">
-            <li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2"><a href="#about">About</a></li>
-            <li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2"><a href="#experience">Experience</a></li>
-            <li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2"><a href="#work">Work</a></li>
-            <li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2"><a href="#contact">Contact</a></li>
-            <li class="h-8 w-auto border-white border-2 flex justify-center items-center hover:bg-bdazzled-blue-500">
-                <a class="w-12" href="#">CV</a>
-            </li>
-        </ul> -->
-        
-    </header>
+<main class="h-full w-full min-h-screen flex flex-col bg-gunmetal relative overflow-hidden">
+    <Header />
 
     <!-- Main Content -->
-    <div class="flex-grow flex flex-col  gap-4 justify-center">
+    <div class="flex-grow flex flex-col gap-4 justify-center">
         
-        <section id="banner" class="w-full h-full min-h-fit flex-1 flex-grow text-2xl flex items-center flex-col justify-center p-4 sm:p-24">
+        <section id="banner" class="w-full h-full min-h-screen flex-1 flex-grow text-2xl flex items-center flex-col justify-center p-4 sm:p-24">
             <h1 class="flex flex-col gap-2">
                 <span class="text-base font-mono font-thin">Hi 👋<br></span>
                 <span class="text-4xl text-burnt-sienna">I'm Edd <br></span>
@@ -79,11 +30,12 @@
             </h1>
         </section>
 
-        <!-- <section id="about">
+        <section id="about" class="w-full h-full min-h-screen flex-1 flex-grow">
             <h2 class="underline">About Edd</h2>
             <p>I'm Edd 👋</p>
         </section>
         
+        <!--
         <section id="experience"></section>
         
         <section id="work"></section>

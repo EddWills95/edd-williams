@@ -48,7 +48,7 @@ const config = {
 				/* @keyframes duration | easing-function | delay | iteration-count | direction | fill-mode | play-state | name */
 				// animation: 3s ease-in 1s 2 reverse both paused slidein;
 
-				'translate-scroll': 'scroll 8s cubic-bezier(0.65,0.05,0.36,1) 0s infinite alternate'
+				'translate-scroll': 'scroll 6s ease-in 0s infinite alternate'
 			}
 		}
 	},
