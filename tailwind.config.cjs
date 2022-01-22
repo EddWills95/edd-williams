@@ -16,9 +16,21 @@ const config = {
 				800: '#070A0E',
 				900: '#000000'
 			},
+			'burnt-sienna': {
+				DEFAULT: '#EE6C4D',
+				50: '#FEF6F5',
+				100: '#FCE7E2',
+				200: '#F9C8BD',
+				300: '#F5AA97',
+				400: '#F28B72',
+				500: '#EE6C4D',
+				600: '#E9421A',
+				700: '#B93212',
+				800: '#86240D',
+				900: '#531608'
+			},
 			'pale-cerulean': '#98c1d9ff',
 			'light-cyan': '#e0fbfcff',
-			'burnt-sienna': '#ee6c4dff',
 			gunmetal: '#293241ff'
 		},
 		extend: {
@@ -30,13 +42,15 @@ const config = {
 					'20%': {
 						transform: 'translateY(0px)'
 					},
-					'40%': {
+					// Make change
+					'35%': {
 						transform: 'translateY(-36px)'
 					},
 					'60%': {
 						transform: 'translateY(-36px)'
 					},
-					'80%': {
+					// make Change
+					'75%': {
 						transform: 'translateY(-71px)'
 					},
 					'100%': {
