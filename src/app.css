@@ -33,12 +33,17 @@ body {
     @apply px-2 border-2 rounded-sm flex justify-center items-center hover:bg-bdazzled-blue-500;
 }
 
+/* Used to offset when scrolling about for the header */
+.anchor {
+    @apply block invisible -top-16;
+}
+
 .base-section {
-    @apply w-full h-full min-h-screen p-4 flex flex-col sm:p-12 sm:w-10/12 text-lg;
+    @apply w-full h-full min-h-screen p-4 flex flex-col sm:p-12 sm:w-10/12 text-lg scroll-pt-4;
 }
 
 .offset-border {
-    @apply relative z-10 before:transition-all before:-z-10 before:bg-burnt-sienna-400 before:top-2 before:left-2 before:absolute before:w-48 before:h-48 before:border-2 before:rounded hover:before:top-4 hover:before:left-4;
+    @apply relative z-10 before:transition-all before:-z-10 before:bg-burnt-sienna-400 before:top-2 before:left-2 before:absolute before:w-full before:h-full before:border-2 before:rounded hover:before:top-4 hover:before:left-4;
 }
 
 .section-break {
@@ -52,4 +57,8 @@ body {
     position: relative;
     left: 50%;
     top: -13px;
+}
+
+.experience-selected {
+    @apply bg-bdazzled-blue-500 shadow-deep-inner;
 }

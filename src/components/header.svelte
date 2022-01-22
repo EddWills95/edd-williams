@@ -24,23 +24,18 @@
 	}
 
 	function deriveClass(y, dy) {
-		// show if at the top of page
 		if (y < offset) {
 			return 'show';
 		}
 
-		// don't change the state unless scroll delta
-		// is above a threshold
 		if (Math.abs(dy) <= tolerance) {
 			return headerClass;
 		}
 
-		// if scrolling up, show
 		if (dy < 0) {
 			return '-translate-y-14';
 		}
 
-		// if scrolling down, hide
 		return '';
 	}
 </script>

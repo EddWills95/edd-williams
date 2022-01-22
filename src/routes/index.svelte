@@ -1,4 +1,5 @@
 <script>
+	import Experience from '../components/experience.svelte';
 	import Header from '../components/header.svelte';
 </script>
 
@@ -38,7 +39,8 @@
 
 		<hr class="section-break" />
 
-		<section id="about" class="base-section justify-start">
+		<span class="anchor" id="about" />
+		<section class="base-section justify-start">
 			<h2 class="text-2xl mb-4">Me, Myself and I</h2>
 
 			<div class="flex flex-col flex-wrap justify-center items-center gap-4 sm:flex-row">
@@ -109,8 +111,14 @@
 
 		<hr class="section-break" />
 
+		<span class="anchor" id="experience" />
+		<section class="base-section justify-start">
+			<h2 class="text-2xl mb-4">Experience</h2>
+
+			<Experience />
+		</section>
+
 		<!--
-        <section id="experience"></section>
         
         <section id="work"></section>
         
