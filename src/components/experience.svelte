@@ -12,10 +12,10 @@
 		},
 		{
 			id: 'quickbooks',
-			buttonText: 'QuickBooks',
+			buttonText: 'Quickbooks',
 			image: './qb.png',
 			imageAlt: 'quickbooks logo',
-			title: 'Quickbooks',
+			title: 'Quickbooks Payroll',
 			tagline: 'Payroll UK',
 			highlights: [
 				'Employee Time Tracking',
@@ -56,47 +56,45 @@
 	let selected = options[0];
 </script>
 
-<div>
-	<div class="overflow-x-scroll grid grid-flow-col gap-8">
-		{#each options as option, i}
-			<div
-				on:click={() => (selected = option)}
-				class="w-32 flex items-center justify-center p-2 hover:cursor-pointer"
-				class:experience-selected={selected.id === option.id}
-			>
-				<span class="text-center flex justify-center items-center">{option.buttonText}</span>
+<div class="overflow-scroll flex w-full">
+	{#each options as option, i}
+		<div
+			on:click={() => (selected = option)}
+			class="h-16 min-w-[150px] flex flex-1 justify-center items-center text-center border-l-2 last:border-r-2 hover:cursor-pointer"
+			class:experience-selected={selected.id === option.id}
+		>
+			{option.buttonText}
+		</div>
+	{/each}
+</div>
+<div class="p-4 mt-4 flex flex-col gap-2">
+	{#each options as option, i}
+		{#if selected.id === option.id}
+			<div class="flex flex-wrap justify-center sm:justify-between items-start gap-4">
+				<div class="flex flex-col justify-center">
+					<h2 class="text-3xl">{option.title}</h2>
+					<p class="italic">{option.tagline}</p>
+				</div>
+				<div class="offset-border">
+					<img class="object-cover w-auto h-24 sm:h-24" src={option.image} alt={option.imageAlt} />
+				</div>
 			</div>
-		{/each}
-	</div>
-	<div class="p-4 flex flex-col gap-2">
-		{#each options as option, i}
-			{#if selected.id === option.id}
-				<div class="flex justify-between items-start gap-4">
-					<div class="flex flex-col justify-center">
-						<h2 class="text-3xl">{option.title}</h2>
-						<p class="italic">{option.tagline}</p>
-					</div>
-					<div class="offset-border">
-						<img class="w-auto h-24" src={option.image} alt={option.imageAlt} />
-					</div>
-				</div>
-				<div>
-					<h5 class="underline text-burnt-sienna-500">Highlights</h5>
-					<ul class="list-disc list-inside">
-						{#each option.highlights as highlight}
-							<li>{highlight}</li>
-						{/each}
-					</ul>
-				</div>
-				<div>
-					<h5 class="underline text-burnt-sienna-500">Tech</h5>
-					<ul class="list-disc list-inside">
-						{#each option.tech as tech}
-							<li>{tech}</li>
-						{/each}
-					</ul>
-				</div>
-			{/if}
-		{/each}
-	</div>
+			<div>
+				<h5 class="underline text-burnt-sienna-500">Highlights</h5>
+				<ul class="list-disc list-inside">
+					{#each option.highlights as highlight}
+						<li>{highlight}</li>
+					{/each}
+				</ul>
+			</div>
+			<div>
+				<h5 class="underline text-burnt-sienna-500">Tech</h5>
+				<ul class="list-disc list-inside">
+					{#each option.tech as tech}
+						<li>{tech}</li>
+					{/each}
+				</ul>
+			</div>
+		{/if}
+	{/each}
 </div>

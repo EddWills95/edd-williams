@@ -44,7 +44,7 @@
 
 <div
 	id="hidden-menu"
-	class="absolute transition-transform duration-300 h-screen w-screen inset-0 p-4 z-50 translate-x-full bg-bdazzled-blue-700"
+	class="fixed transition-transform duration-300 h-screen w-screen inset-0 p-4 z-50 translate-x-full bg-bdazzled-blue-700"
 >
 	<div class="flex justify-between">
 		<EddHome handler={handleCloseMenu} />
@@ -70,22 +70,22 @@
 			<li
 				class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2"
 			>
-				<a href="#about">About</a>
+				<a on:click={handleCloseMenu} href="#about">About</a>
 			</li>
 			<li
 				class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2"
 			>
-				<a href="#experience">Experience</a>
+				<a on:click={handleCloseMenu} href="#experience">Experience</a>
 			</li>
 			<li
 				class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2"
 			>
-				<a href="#work">Work</a>
+				<a on:click={handleCloseMenu} href="#projects">Projects</a>
 			</li>
 			<li
 				class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2"
 			>
-				<a href="#contact">Contact</a>
+				<a on:click={handleCloseMenu} href="#contact">Contact</a>
 			</li>
 			<li class="h-8 w-auto flex justify-center items-center">
 				<a href="#" class="w-12 rounded-button">CV</a>
