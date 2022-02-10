@@ -17,7 +17,7 @@ jobs:
         with:
           node-version: '14'
       - run: npm install
-      - run: npm test
+      - run: npm build
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
@@ -26,4 +26,4 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
     - name: Deploy static site to S3 bucket
-      run: aws s3 sync ./public/ s3://edd-williams-bucket --delete
+      run: aws s3 sync ./build/ s3://edd-williams-bucket --delete
