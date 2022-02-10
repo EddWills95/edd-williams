@@ -88,7 +88,11 @@
 				<a on:click={handleCloseMenu} href="#contact">Contact</a>
 			</li>
 			<li class="h-8 w-auto flex justify-center items-center">
-				<a href="#" class="w-12 rounded-button">CV</a>
+				<a
+					href="https://www.dropbox.com/s/m6421udkx2a14lo/Edd%20Williams%20-%20CV.pdf?dl=0"
+					target="_blank"
+					class="w-12 rounded-button">CV</a
+				>
 			</li>
 		</ul>
 	</nav>
@@ -127,13 +131,17 @@
 			<a href="#experience">Experience</a>
 		</li>
 		<li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2">
-			<a href="#work">Work</a>
+			<a href="#projects">Projects</a>
 		</li>
 		<li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2">
 			<a href="#contact">Contact</a>
 		</li>
 		<li class="h-8 w-auto">
-			<a href="#" class="w-12 rounded-button">CV</a>
+			<a
+				href="https://www.dropbox.com/s/m6421udkx2a14lo/Edd%20Williams%20-%20CV.pdf?dl=0"
+				target="_blank"
+				class="w-12 rounded-button">CV</a
+			>
 		</li>
 	</ul>
 </header>

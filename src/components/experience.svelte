@@ -41,7 +41,7 @@
 			buttonText: 'We Got Coders',
 			image: './wgc.png',
 			imageAlt: 'quickbooks logo',
-			title: 'Quickbooks',
+			title: 'We Got Coders',
 			tagline: 'Intensive Ruby on Rails training course',
 			highlights: [
 				'Full stack training',
@@ -70,13 +70,17 @@
 <div class="p-4 mt-4 flex flex-col gap-2">
 	{#each options as option, i}
 		{#if selected.id === option.id}
-			<div class="flex flex-wrap justify-center sm:justify-between items-start gap-4">
+			<div class="flex gap-8 flex-wrap justify-center items-center">
 				<div class="flex flex-col justify-center">
-					<h2 class="text-3xl">{option.title}</h2>
+					<h3 class="text-3xl">{option.title}</h3>
 					<p class="italic">{option.tagline}</p>
 				</div>
 				<div class="offset-border">
-					<img class="object-cover w-auto h-24 sm:h-24" src={option.image} alt={option.imageAlt} />
+					<img
+						class="rounded-sm object-cover w-auto h-24"
+						src={option.image}
+						alt={option.imageAlt}
+					/>
 				</div>
 			</div>
 			<div>

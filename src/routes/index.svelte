@@ -1,7 +1,9 @@
 <script>
+	import Projects from '../components/projects.svelte';
 	import About from '../components/about.svelte';
 	import Experience from '../components/experience.svelte';
 	import Header from '../components/header.svelte';
+	import Contact from '../components/contact.svelte';
 </script>
 
 <!-- This might not need to be main -->
@@ -60,9 +62,18 @@
 
 		<span class="anchor" id="projects" />
 		<section class="base-section justify-start">
-			<h2 class="text-2xl mb-4">Projects</h2>
+			<h2 class="text-2xl mb-4">More projects</h2>
+
+			<Projects />
 		</section>
 
-		<!-- <section id="contact" /> -->
+		<hr class="section-break" />
+
+		<span class="anchor" id="contact" />
+		<section class="min-h-[200px] flex flex-col justify-start items-center">
+			<h2 class="text-2xl mb-4 underline">Contact</h2>
+
+			<Contact />
+		</section>
 	</div>
 </main>

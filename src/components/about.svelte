@@ -44,7 +44,7 @@
 			<span class="hidden sm:block text-2xl absolute -left-10 top-0">🗳</span>
 		</p>
 
-		<div class="flex w-full gap-8 justify-center">
+		<div class="flex w-full gap-8 justify-center mt-4">
 			<div>
 				<p class="italic">A flavour of my toolset:</p>
 				<ul class="list-disc list-inside">

@@ -4,61 +4,65 @@
 @tailwind utilities;
 
 html {
-    scroll-behavior: smooth;
+	scroll-behavior: smooth;
 }
 
 body {
-    --bdazzled-blue: #3d5a80ff;
-    --pale-cerulean: #98c1d9ff;
-    --light-cyan: #e0fbfcff;
-    --burnt-sienna: #ee6c4dff;
-    --gunmetal: #293241ff;
+	--bdazzled-blue: #3d5a80ff;
+	--pale-cerulean: #98c1d9ff;
+	--light-cyan: #e0fbfcff;
+	--burnt-sienna: #ee6c4dff;
+	--gunmetal: #293241ff;
 
-    /* --rich-black: #023c40ff;
+	/* --rich-black: #023c40ff;
 --tuscany: #c3979fff;
 --vivid-sky-blue: #0ad3ffff;
 --aquamarine: #78ffd6ff;
 --light-cyan: #e1faf9ff; */
 
-    font-family: 'Raleway', sans-serif;
+	font-family: 'Raleway', sans-serif;
 
-    scroll-behavior: smooth;
+	scroll-behavior: smooth;
 
-    color: white;
+	color: white;
 
-    box-sizing: border-box;
+	box-sizing: border-box;
 }
 
 .rounded-button {
-    @apply px-2 border-2 rounded-sm flex justify-center items-center hover:bg-bdazzled-blue-500;
+	@apply px-2 border-2 rounded-sm flex justify-center items-center hover:bg-bdazzled-blue-500;
 }
 
 /* Used to offset when scrolling about for the header */
 .anchor {
-    @apply block invisible -top-16;
+	@apply block invisible -top-16;
 }
 
 .base-section {
-    @apply w-full h-full min-h-screen p-4 flex flex-col sm:p-12 sm:w-10/12 text-lg scroll-pt-4;
+	@apply w-full h-full min-h-screen px-4 py-2 flex flex-col text-lg scroll-pt-4 sm:p-12 lg:w-8/12;
 }
 
 .offset-border {
-    @apply relative z-10 before:transition-all before:-z-10 before:bg-burnt-sienna-400 before:top-2 before:left-2 before:absolute before:w-full before:h-full before:border-2 before:rounded hover:before:top-4 hover:before:left-4;
+	@apply mb-2 relative z-10 before:transition-all before:-z-10 before:bg-burnt-sienna-400 before:top-2 before:left-2 before:absolute before:w-full before:h-full before:border-2 before:rounded hover:before:top-4 hover:before:left-4;
 }
 
 .section-break {
-    @apply block border-t-pale-cerulean border-t-2 text-pale-cerulean overflow-visible h-1 w-10/12 m-auto;
+	@apply block border-t-pale-cerulean border-t-2 text-pale-cerulean overflow-visible h-1 w-10/12 m-auto;
 }
 
 .section-break::after {
-    @apply bg-gunmetal;
-    content: 'E';
-    padding: 0 4px;
-    position: relative;
-    left: 50%;
-    top: -13px;
+	@apply bg-gunmetal;
+	content: 'E';
+	padding: 0 4px;
+	position: relative;
+	left: 50%;
+	top: -13px;
 }
 
 .experience-selected {
-    @apply bg-bdazzled-blue-500 shadow-deep-inner;
+	@apply bg-bdazzled-blue-500 shadow-deep-inner;
+}
+
+.auto-margin {
+	@apply my-0 mx-auto;
 }
