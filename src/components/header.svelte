@@ -1,6 +1,8 @@
 <script>
 	import EddHome from './edd-home.svelte';
 
+	const CVLink = 'https://www.dropbox.com/s/rqz79a5jducfnyy/Edd%20Williams%20-%20CV.pdf?dl=0';
+
 	function handleOpenMenu() {
 		document.querySelector('#hidden-menu').classList.remove('translate-x-full');
 	}
@@ -88,11 +90,7 @@
 				<a on:click={handleCloseMenu} href="#contact">Contact</a>
 			</li>
 			<li class="h-8 w-auto flex justify-center items-center">
-				<a
-					href="https://www.dropbox.com/s/m6421udkx2a14lo/Edd%20Williams%20-%20CV.pdf?dl=0"
-					target="_blank"
-					class="w-12 rounded-button">CV</a
-				>
+				<a href={CVLink} target="_blank" class="w-12 rounded-button">CV</a>
 			</li>
 		</ul>
 	</nav>
@@ -137,11 +135,7 @@
 			<a href="#contact">Contact</a>
 		</li>
 		<li class="h-8 w-auto">
-			<a
-				href="https://www.dropbox.com/s/m6421udkx2a14lo/Edd%20Williams%20-%20CV.pdf?dl=0"
-				target="_blank"
-				class="w-12 rounded-button">CV</a
-			>
+			<a href={CVLink} target="_blank" class="w-12 rounded-button">CV</a>
 		</li>
 	</ul>
 </header>
