@@ -1,4 +1,10 @@
-<section id="banner" class="base-section text-2xl items-center justify-center sm:p-24">
+<script>
+	function visitCode() {
+		window.open('https://github.com/EddWills95/edd-williams', '_blank');
+	}
+</script>
+
+<section id="banner" class="section-no-padding relative text-2xl items-center justify-center">
 	<h1 class="flex flex-col gap-2">
 		<span class="text-base font-mono font-thin">Hi 👋<br /></span>
 		<span class="text-4xl text-burnt-sienna">I'm Edd <br /></span>
@@ -24,4 +30,12 @@
 			</span>
 		</div>
 	</h1>
+
+	<div
+		class="absolute bottom-0 right-0 bg-white text-black w-24 h-20 text-sm hover:cursor-pointer bg-source-code bg-bottom
+    before:absolute before:w-48 before:h-48 before:-top-28 before:-left-24 before:rotate-45 before:bg-gunmetal
+    hover:before:-translate-x-2 hover:before:-translate-y-2 before:transition-transform
+    "
+		on:click={visitCode}
+	/>
 </section>

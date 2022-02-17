@@ -38,6 +38,10 @@ body {
 	@apply block invisible -top-16;
 }
 
+.section-no-padding {
+	@apply w-full h-full min-h-screen flex flex-col;
+}
+
 .base-section {
 	@apply w-full h-full min-h-screen px-4 py-2 flex flex-col text-lg scroll-pt-4 sm:p-12 lg:w-8/12;
 }
