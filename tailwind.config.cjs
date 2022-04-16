@@ -69,7 +69,7 @@ const config = {
 				'translate-scroll': 'scroll 6s ease-in 0s infinite alternate'
 			},
 			backgroundImage: {
-				'source-code': "url('./code.png')"
+				'source-code': "url('code.png')"
 			}
 		}
 	},
