@@ -1,6 +1,16 @@
 <script>
 	const options = [
 		{
+			id: 'limejump',
+			buttonText: 'Limejump',
+			image: './limejump.jpeg',
+			imageAlt: 'limejump logo',
+			title: 'Limejump',
+			tagline: 'CX Ui Developer',
+			highlights: ['Self-Serve PPA calculator'],
+			tech: ['React', 'Redux', 'Node', 'Storybook', 'Kubernetes']
+		},
+		{
 			id: 'ovo',
 			buttonText: 'OVO',
 			image: './ovo.png',
