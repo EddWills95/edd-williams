@@ -6,9 +6,9 @@
 			image: './limejump.jpeg',
 			imageAlt: 'limejump logo',
 			title: 'Limejump',
-			tagline: 'CX Ui Developer',
-			highlights: ['Self-Serve PPA calculator'],
-			tech: ['React', 'Redux', 'Node', 'Storybook', 'Kubernetes']
+			tagline: 'Customer Experience Developer',
+			highlights: ['Self-Serve PPA calculator', 'Internal quoting tool'],
+			tech: ['React', 'Redux', 'Node', 'Angular', 'Storybook', 'Kubernetes']
 		},
 		{
 			id: 'ovo',
