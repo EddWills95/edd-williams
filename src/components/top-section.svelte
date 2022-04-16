@@ -32,10 +32,11 @@
 	</h1>
 
 	<div
-		class="absolute bottom-0 right-0 bg-white text-black w-24 h-20 text-sm hover:cursor-pointer bg-source-code bg-bottom
+		class="absolute bottom-0 right-0 bg-white text-black w-24 h-20 text-sm hover:cursor-pointer bg-bottom
     before:absolute before:w-48 before:h-40 before:-top-28 before:-left-24 before:rotate-45 before:bg-gunmetal
     hover:before:-translate-x-2 hover:before:-translate-y-2 before:transition-transform
     "
+		style="background-image: url('./code.png')"
 		on:click={visitCode}
 	/>
 </section>
