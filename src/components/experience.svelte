@@ -7,7 +7,12 @@
 			imageAlt: 'limejump logo',
 			title: 'Limejump',
 			tagline: 'Customer Experience Developer',
-			highlights: ['Self-Serve PPA calculator', 'Internal quoting tool'],
+			highlights: [
+				'Self-Serve PPA calculator',
+				'Internal quoting tool',
+				'Component system',
+				'Private npm registry (verdaccio)'
+			],
 			tech: ['React', 'Redux', 'Node', 'Angular', 'Storybook', 'Kubernetes']
 		},
 		{
@@ -77,38 +82,32 @@
 		</div>
 	{/each}
 </div>
-<div class="p-4 mt-4 flex flex-col gap-2">
-	{#each options as option, i}
-		{#if selected.id === option.id}
-			<div class="flex gap-8 flex-wrap justify-center items-center">
-				<div class="flex flex-col justify-center">
-					<h3 class="text-3xl">{option.title}</h3>
-					<p class="italic">{option.tagline}</p>
-				</div>
-				<div class="offset-border">
-					<img
-						class="rounded-sm object-cover w-auto h-24"
-						src={option.image}
-						alt={option.imageAlt}
-					/>
-				</div>
+{#each options as option, i}
+	<div class={`p-4 mt-4 flex flex-col gap-2 ${selected.id === option.id ? 'flex' : 'hidden'}`}>
+		<div class="flex gap-8 flex-wrap justify-center items-center">
+			<div class="flex flex-col justify-center">
+				<h3 class="text-3xl">{option.title}</h3>
+				<p class="italic">{option.tagline}</p>
 			</div>
-			<div>
-				<h5 class="underline text-burnt-sienna-500">Highlights</h5>
-				<ul class="list-disc list-inside">
-					{#each option.highlights as highlight}
-						<li>{highlight}</li>
-					{/each}
-				</ul>
+			<div class="offset-border">
+				<img class="rounded-sm object-cover w-auto h-24" src={option.image} alt={option.imageAlt} />
 			</div>
-			<div>
-				<h5 class="underline text-burnt-sienna-500">Tech</h5>
-				<ul class="list-disc list-inside">
-					{#each option.tech as tech}
-						<li>{tech}</li>
-					{/each}
-				</ul>
-			</div>
-		{/if}
-	{/each}
-</div>
+		</div>
+		<div>
+			<h5 class="underline text-burnt-sienna-500">Highlights</h5>
+			<ul class="list-disc list-inside">
+				{#each option.highlights as highlight}
+					<li>{highlight}</li>
+				{/each}
+			</ul>
+		</div>
+		<div>
+			<h5 class="underline text-burnt-sienna-500">Tech</h5>
+			<ul class="list-disc list-inside">
+				{#each option.tech as tech}
+					<li>{tech}</li>
+				{/each}
+			</ul>
+		</div>
+	</div>
+{/each}
