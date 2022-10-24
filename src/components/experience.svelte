@@ -8,10 +8,10 @@
 			title: 'Limejump',
 			tagline: 'Customer Experience Developer',
 			highlights: [
-				'Self-Serve PPA calculator',
-				'Internal quoting tool',
-				'Component system',
-				'Private npm registry (verdaccio)'
+				'Customer Battery Optimisation Portal',
+				'D3 Powered Charts',
+				'Self-Serve PPA Quote calculator (Quotejump)',
+				'React Design system'
 			],
 			tech: ['React', 'Redux', 'Node', 'Angular', 'Storybook', 'Kubernetes']
 		},
