@@ -43,22 +43,30 @@ const config = {
 					'0%': {
 						transform: 'translateY(0px)'
 					},
-					'20%': {
+					'10%': {
 						transform: 'translateY(0px)'
 					},
 					// Make change
-					'35%': {
+					'20%': {
 						transform: 'translateY(-36px)'
 					},
-					'60%': {
+					'40%': {
 						transform: 'translateY(-36px)'
 					},
 					// make Change
-					'75%': {
+					'50%': {
 						transform: 'translateY(-71px)'
 					},
-					'100%': {
+					'70%': {
 						transform: 'translateY(-71px)'
+					},
+
+					// make change
+					'80%': {
+						transform: 'translateY(-108px)'
+					},
+					'100%': {
+						transform: 'translateY(-108px)'
 					}
 				}
 			},
@@ -66,7 +74,7 @@ const config = {
 				/* @keyframes duration | easing-function | delay | iteration-count | direction | fill-mode | play-state | name */
 				// animation: 3s ease-in 1s 2 reverse both paused slidein;
 
-				'translate-scroll': 'scroll 6s ease-in 0s infinite alternate'
+				'translate-scroll': 'scroll 8s ease-in 0s infinite alternate'
 			},
 			backgroundImage: {
 				'source-code': "url('code.png')"

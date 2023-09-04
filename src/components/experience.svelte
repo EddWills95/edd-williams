@@ -1,6 +1,16 @@
 <script>
 	const options = [
 		{
+			id: 'OakNorth',
+			buttonText: 'OakNorth',
+			image: './oaknorth.png',
+			imageAlt: 'oaknorth logo',
+			title: 'OakNorth',
+			tagline: 'React Native Developer',
+			highlights: ['Transactional Banking App', 'Building component library for rebrand'],
+			tech: ['React Native', 'Zustand', 'React Testing Library', 'AWS']
+		},
+		{
 			id: 'limejump',
 			buttonText: 'Limejump',
 			image: './limejump.jpeg',

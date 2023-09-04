@@ -13,6 +13,7 @@
 			<span class="ml-[94px] h-9 overflow-hidden inline-block">
 				<ul class="transform-gpu animate-translate-scroll hover:[animation-play-state:paused]">
 					<li>for the web 🌐</li>
+					<li>for mobile 📱</li>
 					<li>with batteries 🔋</li>
 					<li class="flex items-center">
 						on bitcoin
