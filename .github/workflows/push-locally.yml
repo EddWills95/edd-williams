@@ -45,3 +45,4 @@ jobs:
           source: './build/*'
           target: /home/shared-apps/edd-williams.com
           overwrite: true
+          strip_components: 1
