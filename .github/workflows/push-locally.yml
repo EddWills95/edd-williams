@@ -16,7 +16,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: '20'
 
       - name: Install dependencies
         run: yarn install
@@ -30,7 +30,7 @@ jobs:
 
       - name: Copy files to local server
         env:
-          SERVER_IP: ${{ secrets.SERVER_IP }}
+          SERVER_IP: ${{ secrets.SELF_SERVER_IP }}
           SSH_USERNAME: ${{ secrets.SELF_SERVER_SSH_USERNAME }}
           SSH_PORT: ${{ secrets.SELF_SERVER_SSH_PORT }}
           SSH_PRIVATE_KEY: ${{ secrets.SELF_SERVER_SSH_PRIVATE_KEY }}
