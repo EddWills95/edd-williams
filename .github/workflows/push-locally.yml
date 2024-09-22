@@ -25,7 +25,8 @@ jobs:
         run: yarn build
 
       - name: Debug
-        run: echo "Server IP: ${{ secrets.SERVER_IP }}"
+        run: |
+          echo "Server IP: ${{ secrets.SERVER_IP }}"
 
       - name: Copy files to local server
         env:
