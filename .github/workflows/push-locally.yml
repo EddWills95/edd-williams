@@ -43,5 +43,5 @@ jobs:
           key: ${{ secrets.SELF_SERVER_SSH_PRIVATE_KEY }}
           port: ${{ secrets.SELF_SERVER_SSH_PORT }}
           source: './build/'
-          target: /home/edd/shared-apps/edd-williams.com
+          target: /home/shared-apps/edd-williams.com
           overwrite: true
