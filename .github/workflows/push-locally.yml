@@ -28,14 +28,19 @@ jobs:
         run: |
           echo "Server IP: ${{ secrets.SERVER_IP }}"
 
-      - name: Copy files to local server
-        env:
-          SERVER_IP: ${{ secrets.SELF_SERVER_IP }}
-          SSH_USERNAME: ${{ secrets.SELF_SERVER_SSH_USERNAME }}
-          SSH_PORT: ${{ secrets.SELF_SERVER_SSH_PORT }}
-          SSH_PRIVATE_KEY: ${{ secrets.SELF_SERVER_SSH_PRIVATE_KEY }}
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SELF_SERVER_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          scp -P $SSH_PORT -i ~/.ssh/id_rsa -r ./build/* $SSH_USERNAME@$SERVER_IP:/home/edd/shared-apps/
+      # - name: Copy files to local server
+      #   env:
+      #     SERVER_IP: ${{ secrets.SELF_SERVER_IP }}
+      #     SSH_USERNAME: ${{ secrets.SELF_SERVER_SSH_USERNAME }}
+      #     SSH_PORT: ${{ secrets.SELF_SERVER_SSH_PORT }}
+      #     SSH_PRIVATE_KEY: ${{ secrets.SELF_SERVER_SSH_PRIVATE_KEY }}
+
+      - name: copy file via ssh key
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SELF_SERVER_IP }}
+          username: ${{ secrets.SELF_SERVER_SSH_USERNAME }}
+          key: ${{ secrets.SELF_SERVER_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SELF_SERVER_SSH_PORT }}
+          source: './build/'
+          target: /home/edd/shared-apps/
