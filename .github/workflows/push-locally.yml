@@ -1,4 +1,4 @@
-name: Deploy Website to Local Server
+name: Deploy to Local Server
 
 on:
   push:
@@ -6,23 +6,32 @@ on:
       - main
 
 jobs:
-  deploy-locally:
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
-      - name: Setup Node.js
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '20'
-      - run: yarn install
-      - run: yarn build
+          node-version: '14'
 
-      - name: Copy Files to Server
-        uses: appleboy/scp-action@v0.1.0
-        with:
-          host: ${{ secrets.SELF_SERVER_IP }} # Your home server IP or hostname
-          username: ${{ secrets.SELF_SERVER_SSH_USERNAME }} # Your SSH username
-          key: ${{ secrets.SELF_SERVER_SSH_PRIVATE_KEY }} # Your SSH private key
-          port: ${{ secrets.SELF_SERVER_SSH_PORT }} # Your SSH port
-          source: './build/*' # Source path of the built files
-          target: '/home/edd/edd-williams/' # Target path on your server
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Build the project
+        run: yarn build
+
+      - name: Copy files to local server
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          SSH_USERNAME: ${{ secrets.SELF_SERVER_SSH_USERNAME }}
+          SSH_PORT: ${{ secrets.SELF_SERVER_SSH_PORT }}
+          SSH_PRIVATE_KEY: ${{ secrets.SELF_SERVER_SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SELF_SERVER_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          scp -P $SSH_PORT -i ~/.ssh/id_rsa -r ./build/* $SSH_USERNAME@$SERVER_IP:/home/edd/shared-apps/
