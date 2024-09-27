@@ -126,6 +126,9 @@
 			<a href="#about">About</a>
 		</li>
 		<li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2">
+			<a target="_blank" href="https://blog.edd-williams.com">Blog</a>
+		</li>
+		<li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2">
 			<a href="#experience">Experience</a>
 		</li>
 		<li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2">
