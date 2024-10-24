@@ -3,7 +3,7 @@
 		{
 			id: 'OakNorth',
 			buttonText: 'OakNorth',
-			image: './oaknorth.png',
+			image: './oaknorth.webp',
 			imageAlt: 'oaknorth logo',
 			title: 'OakNorth',
 			tagline: 'React Native Developer',
