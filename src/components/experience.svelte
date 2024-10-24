@@ -7,8 +7,8 @@
 			imageAlt: 'oaknorth logo',
 			title: 'OakNorth',
 			tagline: 'React Native Developer',
-			highlights: ['Transactional Banking App', 'Building component library for rebrand'],
-			tech: ['React Native', 'Zustand', 'React Testing Library', 'AWS']
+			highlights: ['Architected online business banking web platform', 'React native component library', 'Facial and document recognition'],
+			tech: ['React', 'React Native', 'Zustand', 'React Testing Library', 'Python', 'FastAPI', 'AWS']
 		},
 		{
 			id: 'limejump',
