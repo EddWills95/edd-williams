@@ -100,7 +100,7 @@
 				<p class="italic">{option.tagline}</p>
 			</div>
 			<div class="offset-border">
-				<img class="rounded-sm object-cover w-auto h-24" src={option.image} alt={option.imageAlt} />
+				<img class="rounded-sm object-cover w-auto h-24" src={option.image} alt={option.imageAlt} loading="lazy" />
 			</div>
 		</div>
 		<div>
