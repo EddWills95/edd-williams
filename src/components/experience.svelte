@@ -1,14 +1,48 @@
 <script>
 	const options = [
 		{
+			id: 'runna',
+			buttonText: 'Runna',
+			image: './runna.webp',
+			imageAlt: 'runna logo',
+			title: 'Runna',
+			tagline: 'Senior Software Engineer',
+			highlights: [],
+			tech: [
+				'React-Native',
+				'TypeScript',
+				'Apollo',
+				'GraphQL',
+				'Node.js',
+				'Lambda',
+				'DynamoDB',
+				'AWS'
+			]
+		},
+		{
 			id: 'OakNorth',
 			buttonText: 'OakNorth',
 			image: './oaknorth.webp',
 			imageAlt: 'oaknorth logo',
 			title: 'OakNorth',
 			tagline: 'React Native Developer',
-			highlights: ['Frontend Chapter Lead', 'Architect of business banking web platform', 'React (native) component library co-author', 'Facial and document recognition'],
-			tech: ['React', 'React Native', 'Zustand', 'Vite', 'React-Query', 'React Testing Library', 'Python', 'FastAPI', 'AWS']
+			highlights: [
+				'Frontend Chapter Lead',
+				'Architect of business banking web platform',
+				'React (native) component library co-author',
+				'Facial and document recognition'
+			],
+			tech: [
+				'React',
+				'React Native',
+				'Zustand',
+				'Vite',
+				'React-Query',
+				'React Testing Library',
+				'Python',
+				'FastAPI',
+				'AWS'
+			]
 		},
 		{
 			id: 'limejump',
@@ -100,7 +134,12 @@
 				<p class="italic">{option.tagline}</p>
 			</div>
 			<div class="offset-border">
-				<img class="rounded-sm object-cover w-auto h-24" src={option.image} alt={option.imageAlt} loading="lazy" />
+				<img
+					class="rounded-sm object-cover w-auto h-24"
+					src={option.image}
+					alt={option.imageAlt}
+					loading="lazy"
+				/>
 			</div>
 		</div>
 		<div>
