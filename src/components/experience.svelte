@@ -47,7 +47,7 @@
 		{
 			id: 'limejump',
 			buttonText: 'Limejump',
-			image: './limejump.jpeg',
+			image: './limejump.webp',
 			imageAlt: 'limejump logo',
 			title: 'Limejump',
 			tagline: 'Customer Experience Developer',
@@ -62,7 +62,7 @@
 		{
 			id: 'ovo',
 			buttonText: 'OVO',
-			image: './ovo.png',
+			image: './ovo.webp',
 			imageAlt: 'ovo logo',
 			title: 'OVO Energy',
 			tagline: 'OVO Beyond, a carbon offsetting addon',
@@ -72,7 +72,7 @@
 		{
 			id: 'quickbooks',
 			buttonText: 'Quickbooks',
-			image: './qb.png',
+			image: './qb.webp',
 			imageAlt: 'quickbooks logo',
 			title: 'Quickbooks Payroll',
 			tagline: 'Payroll UK',
@@ -88,7 +88,7 @@
 		{
 			id: 'herts',
 			buttonText: 'Herts Uni',
-			image: './herts.png',
+			image: './herts.webp',
 			imageAlt: 'herts logo',
 			title: 'University of Hertfordshire',
 			tagline: 'Internal Directory System rebuild',
@@ -98,7 +98,7 @@
 		{
 			id: 'wgc',
 			buttonText: 'We Got Coders',
-			image: './wgc.png',
+			image: './wgc.webp',
 			imageAlt: 'quickbooks logo',
 			title: 'We Got Coders',
 			tagline: 'Intensive Ruby on Rails training course',

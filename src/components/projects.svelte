@@ -5,7 +5,7 @@
 			title: 'Umbrel',
 			tagline: 'Bitcoin + Lightning RaspberryPi node',
 			text: 'A self-hosted bitcoin node with an app store for self-soverignty apps. Contributed to the UI, fixing bugs and adding features. Started a project to integrate a screen. ',
-			image: './umbrel.png',
+			image: './umbrel.webp',
 			imageAlt: 'get umbrel',
 			github: 'https://github.com/getumbrel/umbrel-dashboard/pulls?q=is%3Apr+author%3AEddWills95+',
 			url: 'https://getumbrel.com/'
@@ -15,7 +15,7 @@
 			title: 'EPSolar Dashboard',
 			tagline: 'RaspberryPi Solar change controller',
 			text: 'Raspberry Pi dashboard that integrates with an EPSolar charge controller. Involved hardware serial investigations and experimentation',
-			image: './raspberry-pi.jpeg',
+			image: './raspberry-pi.webp',
 			imageAlt: 'raspberry pi'
 		},
 		{
@@ -24,7 +24,7 @@
 			tagline: 'My first hardware/software project!',
 			text: 'A PHP, Javascript and Python thermostat using a DHT22 that switches a heating system on and off. While my presentation leaves a lot to be desired, I proved to myself that I was able to create useful projects using my own code. A real turning point in my life',
 			github: 'https://github.com/EddWills95/ThermoPi',
-			image: './thermo-pi.jpg'
+			image: './thermo-pi.webp'
 		}
 	];
 </script>
