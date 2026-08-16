@@ -7,7 +7,11 @@
 			imageAlt: 'runna logo',
 			title: 'Runna',
 			tagline: 'Senior Software Engineer',
-			highlights: [],
+			highlights: [
+				'Product-focused engineer in the Growth squad',
+				'Built Levels, a points-based gamification system to drive engagement beyond running plans',
+				'Delivered A/B experiments in the subscription flow to improve sign-up conversion'
+			],
 			tech: [
 				'React-Native',
 				'TypeScript',
@@ -25,12 +29,13 @@
 			image: './oaknorth.webp',
 			imageAlt: 'oaknorth logo',
 			title: 'OakNorth',
-			tagline: 'React Native Developer',
+			tagline: 'Mid → Senior Software Engineer',
 			highlights: [
-				'Frontend Chapter Lead',
-				'Architect of business banking web platform',
-				'React (native) component library co-author',
-				'Facial and document recognition'
+				'Lead engineer on a greenfield business banking web app, shipping an industry-first dashboard for complex, multi-entity accounts',
+				'Built onboarding flows that reduced time to first use from weeks to days',
+				'Designed and shipped a secure passcode recovery flow using biometrics',
+				'Core contributor to the React/React Native design system; resolved render performance issues in production',
+				'Co-led the frontend chapter, setting standards for TypeScript, testing and architecture'
 			],
 			tech: [
 				'React',
@@ -50,14 +55,14 @@
 			image: './limejump.webp',
 			imageAlt: 'limejump logo',
 			title: 'Limejump',
-			tagline: 'Customer Experience Developer',
+			tagline: 'Full Stack Engineer',
 			highlights: [
-				'Customer Battery Optimisation Portal',
-				'D3 Powered Charts',
-				'Self-Serve PPA Quote calculator (Quotejump)',
-				'React Design system'
+				'Built a real-time monitoring and revenue dashboard for large-scale battery clients',
+				'Designed a custom D3 charting system for energy market data',
+				'Contributed to a NestJS backend deployed on Kubernetes',
+				'Supported other engineers through regular pairing and code reviews'
 			],
-			tech: ['React', 'Redux', 'Node', 'Angular', 'Storybook', 'Kubernetes']
+			tech: ['React', 'Redux', 'Node', 'NestJS', 'D3.js', 'Kubernetes']
 		},
 		{
 			id: 'ovo',
@@ -65,8 +70,13 @@
 			image: './ovo.webp',
 			imageAlt: 'ovo logo',
 			title: 'OVO Energy',
-			tagline: 'OVO Beyond, a carbon offsetting addon',
-			highlights: ['Windfarm investment oppertunity', 'A/B Testing'],
+			tagline: 'Full Stack Engineer',
+			highlights: [
+				'Frontend engineer on OVO Beyond, a carbon-neutral subscription product',
+				'Built aligned features across web and React Native',
+				'Used A/B testing to validate customer-facing features',
+				'Delivered a third-party integration enabling customer investment in renewable energy'
+			],
 			tech: ['React', 'React Native', 'Redux', 'AWS Lambda', 'Node', 'Typescript']
 		},
 		{
@@ -75,13 +85,12 @@
 			image: './qb.webp',
 			imageAlt: 'quickbooks logo',
 			title: 'Quickbooks Payroll',
-			tagline: 'Payroll UK',
+			tagline: 'Junior → Mid Engineer',
 			highlights: [
-				'Employee Time Tracking',
-				'Competitor Import',
-				'Relay => Apollo upgrade',
-				'Auto Pension Submissions',
-				'FTU conversions (^50%)'
+				'Core engineer on the UK payroll product',
+				'Drove 300% customer growth through time tracking and automated pension submissions',
+				'Reduced time to first payroll by 19 days via improved onboarding',
+				'Led frontend GraphQL migration from Relay to Apollo Client'
 			],
 			tech: ['React', 'GraphQL (Relay + Apollo)', 'Micro-Frontends', 'Groovy']
 		},
