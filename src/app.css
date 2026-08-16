@@ -64,7 +64,7 @@ body {
 }
 
 .experience-selected {
-	@apply bg-bdazzled-blue-500 shadow-deep-inner;
+	@apply bg-bdazzled-blue-500 shadow-inner;
 }
 
 .auto-margin {

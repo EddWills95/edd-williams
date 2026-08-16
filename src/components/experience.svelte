@@ -143,7 +143,7 @@
 			</div>
 		</div>
 		<div>
-			<h5 class="underline text-burnt-sienna-500">Highlights</h5>
+			<h4 class="underline text-sm text-burnt-sienna-400">Highlights</h4>
 			<ul class="list-disc list-inside">
 				{#each option.highlights as highlight}
 					<li>{highlight}</li>
@@ -151,7 +151,7 @@
 			</ul>
 		</div>
 		<div>
-			<h5 class="underline text-burnt-sienna-500">Tech</h5>
+			<h4 class="underline text-sm text-burnt-sienna-400">Tech</h4>
 			<ul class="list-disc list-inside">
 				{#each option.tech as tech}
 					<li>{tech}</li>
