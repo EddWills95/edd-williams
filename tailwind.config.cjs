@@ -38,44 +38,6 @@ const config = {
 				'deep-inner':
 					'rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset'
 			},
-			keyframes: {
-				scroll: {
-					'0%': {
-						transform: 'translateY(0px)'
-					},
-					'10%': {
-						transform: 'translateY(0px)'
-					},
-					// Make change
-					'20%': {
-						transform: 'translateY(-36px)'
-					},
-					'40%': {
-						transform: 'translateY(-36px)'
-					},
-					// make Change
-					'50%': {
-						transform: 'translateY(-71px)'
-					},
-					'70%': {
-						transform: 'translateY(-71px)'
-					},
-
-					// make change
-					'80%': {
-						transform: 'translateY(-108px)'
-					},
-					'100%': {
-						transform: 'translateY(-108px)'
-					}
-				}
-			},
-			animation: {
-				/* @keyframes duration | easing-function | delay | iteration-count | direction | fill-mode | play-state | name */
-				// animation: 3s ease-in 1s 2 reverse both paused slidein;
-
-				'translate-scroll': 'scroll 8s ease-in 0s infinite alternate'
-			},
 			backgroundImage: {
 				'source-code': "url('code.png')"
 			}

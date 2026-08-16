@@ -70,3 +70,32 @@ body {
 .auto-margin {
 	@apply my-0 mx-auto;
 }
+
+@keyframes phrase-cycle {
+	0%,
+	20% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+	25%,
+	95% {
+		opacity: 0;
+		transform: translateY(-8px);
+	}
+	100% {
+		opacity: 0;
+	}
+}
+
+.phrase-cycle {
+	animation: phrase-cycle 10s ease-in-out infinite;
+	opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.phrase-cycle {
+		animation: none;
+		opacity: 1;
+		position: static !important;
+	}
+}
