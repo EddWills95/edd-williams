@@ -50,5 +50,38 @@
 			{/if}
 		</div>
 		<p>{project.text}</p>
+		<div class="flex gap-4">
+			{#if project.url}
+				<a
+					href={project.url}
+					target="_blank"
+					rel="noopener noreferrer"
+					class="italic underline text-bdazzled-blue-100"
+				>
+					Visit site →
+				</a>
+			{/if}
+			{#if project.github}
+				<a
+					href={project.github}
+					target="_blank"
+					rel="noopener noreferrer"
+					class="italic underline text-bdazzled-blue-100"
+				>
+					View code →
+				</a>
+			{/if}
+		</div>
 	</div>
 {/each}
+
+<a
+	href="https://inventing-mostly.com"
+	target="_blank"
+	rel="noopener noreferrer"
+	class="mt-8 p-6 flex flex-col gap-2 items-center text-center border-2 border-burnt-sienna-400 rounded hover:bg-burnt-sienna-400/10 transition-colors"
+>
+	<span class="text-xl">More projects live at</span>
+	<span class="text-2xl text-burnt-sienna-400 underline">inventing-mostly.com →</span>
+	<span class="italic text-base">Where I actually keep most of what I build</span>
+</a>
