@@ -7,7 +7,7 @@
 <section id="banner" class="section-no-padding relative text-2xl items-center justify-center">
 	<h1 class="flex flex-col gap-2">
 		<span class="text-base font-mono font-thin">Hey 👋<br /></span>
-		<span class="text-4xl text-burnt-sienna">I'm Edd <br /></span>
+		<span class="text-4xl text-burnt-sienna-400">I'm Edd <br /></span>
 		<span class="text-3xl flex-col gap-2 text-light-cyan"> I build cool things </span>
 		<div class="flex text-3xl text-light-cyan">
 			<span class="ml-[94px] h-9 relative inline-block min-w-[220px]">

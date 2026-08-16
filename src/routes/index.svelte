@@ -8,7 +8,7 @@
 </script>
 
 <!-- This might not need to be main -->
-<main class="h-full w-full min-h-screen flex flex-col bg-gunmetal relative overflow-hidden">
+<main class="h-full w-full min-h-screen flex flex-col bg-gunmetal relative overflow-x-hidden">
 	<Header />
 
 	<!-- Main Content -->

@@ -7,7 +7,7 @@
 			>
 			and <span class="italic text-burnt-sienna-400">python web scrapers</span>, fascinated how the
 			virtual and real world could come together.
-			<span class="hidden sm:block text-2xl absolute -right-6 top-0">🌐</span>
+			<span class="hidden lg:block text-2xl absolute -right-6 top-0">🌐</span>
 		</p>
 
 		<p class="relative">
@@ -15,7 +15,7 @@
 				class="italic text-burnt-sienna-400">some internet currency</span
 			>
 			that "the guys in the office were going crazy for". From there, I was hooked.
-			<span class="hidden sm:block text-2xl absolute -left-12 top-0">
+			<span class="hidden lg:block text-2xl absolute -left-12 top-0">
 				<svg class="inline ml-2" xmlns="http://www.w3.org/2000/svg" width="32" height="32"
 					><g fill="none" fill-rule="evenodd"
 						><circle cx="16" cy="16" r="16" fill="#F7931A" /><path
@@ -33,7 +33,7 @@
 			<span class="italic text-burnt-sienna-400">repurposing</span> and
 			<span class="italic text-burnt-sienna-400">upcycling</span> them. I don't think the importance
 			of energy storage can be overstated for the future
-			<span class="hidden sm:block text-2xl absolute -right-6 top-0"> 🔋 </span>
+			<span class="hidden lg:block text-2xl absolute -right-6 top-0"> 🔋 </span>
 		</p>
 
 		<p class="relative">
@@ -41,7 +41,7 @@
 			building products <span class="italic text-burnt-sienna-400">for people</span> and
 			<span class="italic text-burnt-sienna-400">with people</span>. I thrive in colaberative teams;
 			researching, designing and building end to end features.
-			<span class="hidden sm:block text-2xl absolute -left-10 top-0">🗳</span>
+			<span class="hidden lg:block text-2xl absolute -left-10 top-0">🗳</span>
 		</p>
 
 		<div class="flex w-full gap-8 justify-center mt-4">
