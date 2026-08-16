@@ -11,15 +11,19 @@
 		<span class="text-3xl flex-col gap-2 text-light-cyan"> I build cool things </span>
 		<div class="flex text-3xl text-light-cyan">
 			<span class="ml-[94px] h-9 relative inline-block min-w-[220px]">
-				<span class="phrase-cycle absolute inset-0" style="animation-delay: 0s">for the web 🌐</span
+				<span class="phrase-cycle absolute inset-0 whitespace-nowrap" style="animation-delay: 0s"
+					>for the web 🌐</span
 				>
-				<span class="phrase-cycle absolute inset-0" style="animation-delay: 2.5s"
+				<span class="phrase-cycle absolute inset-0 whitespace-nowrap" style="animation-delay: 2.5s"
 					>for mobile 📱</span
 				>
-				<span class="phrase-cycle absolute inset-0" style="animation-delay: 5s"
+				<span class="phrase-cycle absolute inset-0 whitespace-nowrap" style="animation-delay: 5s"
 					>with batteries 🔋</span
 				>
-				<span class="phrase-cycle absolute inset-0 flex items-center" style="animation-delay: 7.5s">
+				<span
+					class="phrase-cycle absolute inset-0 flex items-center whitespace-nowrap"
+					style="animation-delay: 7.5s"
+				>
 					on bitcoin
 					<svg class="inline ml-2" xmlns="http://www.w3.org/2000/svg" width="32" height="32"
 						><g fill="none" fill-rule="evenodd"

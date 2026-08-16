@@ -95,7 +95,9 @@ body {
 @media (prefers-reduced-motion: reduce) {
 	.phrase-cycle {
 		animation: none;
+		opacity: 0;
+	}
+	.phrase-cycle:first-child {
 		opacity: 1;
-		position: static !important;
 	}
 }
