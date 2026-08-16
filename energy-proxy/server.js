@@ -1,18 +1,26 @@
 import express from 'express';
 import cors from 'cors';
 
-const {
-	HA_URL,
-	HA_TOKEN,
-	PORT = 3001,
-	CACHE_TTL_SECONDS = '600',
-	ALLOWED_ORIGINS = 'http://localhost:3000'
-} = process.env;
+// PaaS env-var UIs routinely round-trip pasted values with a trailing newline or stray
+// whitespace — trim each one so a copy-paste artifact doesn't silently break auth or
+// produce a malformed fetch URL.
+const trim = (v) => v?.trim();
+const HA_URL = trim(process.env.HA_URL);
+const HA_TOKEN = trim(process.env.HA_TOKEN);
+const PORT = trim(process.env.PORT) || 3001;
+const CACHE_TTL_SECONDS = trim(process.env.CACHE_TTL_SECONDS) || '600';
+const ALLOWED_ORIGINS = trim(process.env.ALLOWED_ORIGINS) || 'http://localhost:3000';
 
 if (!HA_URL || !HA_TOKEN) {
 	console.error('HA_URL and HA_TOKEN must both be set. See .env.example.');
 	process.exit(1);
 }
+
+// Log non-secret shape info at startup — enough to catch "value got mangled" without ever
+// printing the token itself.
+console.log(
+	`HA_URL="${HA_URL}" (length ${HA_URL.length}), HA_TOKEN length ${HA_TOKEN.length}, starts with "${HA_TOKEN.slice(0, 6)}..."`
+);
 
 // entity_id -> the key it maps to in the response payload
 const ENTITIES = {
@@ -28,14 +36,16 @@ const cacheTtlMs = Number(CACHE_TTL_SECONDS) * 1000;
 let cache = null; // { data, fetchedAt }
 
 async function fetchEntityState(entityId) {
-	const res = await fetch(`${HA_URL}/api/states/${entityId}`, {
+	const url = `${HA_URL}/api/states/${entityId}`;
+	const res = await fetch(url, {
 		headers: {
 			Authorization: `Bearer ${HA_TOKEN}`,
 			'Content-Type': 'application/json'
 		}
 	});
 	if (!res.ok) {
-		throw new Error(`Home Assistant returned ${res.status} for ${entityId}`);
+		const body = await res.text().catch(() => '<unreadable body>');
+		throw new Error(`Home Assistant returned ${res.status} for ${entityId} (${url}): ${body}`);
 	}
 	return res.json();
 }
