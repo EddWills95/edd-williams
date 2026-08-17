@@ -56,7 +56,8 @@ async function fetchEntityState(entityId) {
 const BATTERY_ACTION_LABELS = {
 	DISCHARGE: 'Discharging',
 	CHARGE: 'Charging',
-	IDLE: 'Idle'
+	IDLE: 'Idle',
+	HOLD: 'Holding'
 };
 
 function batteryActionLabel(value) {

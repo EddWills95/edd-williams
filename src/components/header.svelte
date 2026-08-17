@@ -87,6 +87,11 @@
 			<li
 				class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2"
 			>
+				<a on:click={handleCloseMenu} href="#home-lab">Home Lab</a>
+			</li>
+			<li
+				class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2"
+			>
 				<a on:click={handleCloseMenu} href="#contact">Contact</a>
 			</li>
 			<li class="h-8 w-auto flex justify-center items-center">
@@ -130,6 +135,9 @@
 		</li>
 		<li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2">
 			<a href="#projects">Projects</a>
+		</li>
+		<li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2">
+			<a href="#home-lab">Home Lab</a>
 		</li>
 		<li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2">
 			<a href="#contact">Contact</a>

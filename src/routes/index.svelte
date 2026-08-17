@@ -5,6 +5,7 @@
 	import Experience from '../components/experience.svelte';
 	import Header from '../components/header.svelte';
 	import Contact from '../components/contact.svelte';
+	import HomeLab from '../components/home-lab.svelte';
 </script>
 
 <!-- This might not need to be main -->
@@ -41,6 +42,10 @@
 
 			<Projects />
 		</section>
+
+		<hr class="section-break" />
+
+		<HomeLab />
 
 		<hr class="section-break" />
 
