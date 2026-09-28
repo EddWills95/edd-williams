@@ -141,3 +141,48 @@ body {
 		animation: none;
 	}
 }
+
+@keyframes fade-up {
+	from {
+		opacity: 0;
+		transform: translateY(12px);
+	}
+}
+
+.fade-up {
+	animation: fade-up 0.6s ease-out backwards;
+}
+
+@keyframes live-ping {
+	75%,
+	100% {
+		transform: scale(2.4);
+		opacity: 0;
+	}
+}
+
+.live-ping {
+	animation: live-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes scroll-cue {
+	0%,
+	100% {
+		transform: translate(-50%, 0);
+	}
+	50% {
+		transform: translate(-50%, 6px);
+	}
+}
+
+.scroll-cue {
+	animation: scroll-cue 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.fade-up,
+	.live-ping,
+	.scroll-cue {
+		animation: none;
+	}
+}

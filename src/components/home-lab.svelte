@@ -5,6 +5,7 @@
 	const STATS_URL = 'https://energy.edd-williams.com/api/energy-stats';
 
 	let stats = null;
+	let fetchedAt = '';
 	let error = false;
 	let diagramContainer;
 
@@ -13,6 +14,7 @@
 			const res = await fetch(STATS_URL);
 			if (!res.ok) throw new Error(`energy-proxy returned ${res.status}`);
 			stats = await res.json();
+			fetchedAt = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 		} catch (err) {
 			console.error('Failed to load home lab stats:', err);
 			error = true;
@@ -31,6 +33,15 @@
 			Alongside the day job, I run a small home lab — solar, battery storage, and a pile of
 			self-hosted services. These numbers are pulled live from the same Home Assistant setup that
 			runs my house.
+		</p>
+		<p class="text-base">
+			<a
+				class="underline text-bdazzled-blue-100"
+				href="https://github.com/EddWills95/edd-williams/tree/main/energy-proxy"
+				target="_blank"
+				rel="noopener noreferrer">How it's built →</a
+			>
+			{#if fetchedAt}<span class="text-light-cyan/75 ml-2">Live · fetched at {fetchedAt}</span>{/if}
 		</p>
 
 		{#if error}

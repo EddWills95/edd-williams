@@ -1,12 +1,28 @@
+<script>
+	const skills = [
+		'TypeScript',
+		'React / React Native',
+		'Next.js',
+		'Node / NestJS',
+		'Python / FastAPI',
+		'GraphQL',
+		'Playwright / Cypress',
+		'D3.js',
+		'Docker / AWS',
+		'A/B testing'
+	];
+</script>
+
 <div class="flex flex-col flex-wrap justify-center items-center gap-4 sm:flex-row">
 	<article class="flex flex-col gap-4 leading-relaxed">
 		<p class="relative">
 			I've been messing with technology for as long as I can remember, starting with
 			<span class="italic text-burnt-sienna-400">JavaScript animations</span> and
 			<span class="italic text-burnt-sienna-400">Python scrapers</span>, fascinated by how the
-			virtual and real worlds could come together. Professionally that's been since 2018, across
-			payroll, energy, banking and now fitness. Day to day I'm a product-focused engineer, happiest
-			on the parts people actually touch: onboarding, experiments and design systems.
+			virtual and real worlds could come together. My first real project was a Raspberry Pi
+			thermostat, a turning point for me. Professionally that's been since 2018, across payroll,
+			energy, banking and now fitness. Day to day I'm a product-focused engineer, happiest on the
+			parts people actually touch: onboarding, experiments and design systems.
 			<span class="hidden lg:block text-2xl absolute -right-6 top-0">🌐</span>
 		</p>
 
@@ -41,18 +57,17 @@
 			<span class="hidden lg:block text-2xl absolute -left-10 top-0">🗳</span>
 		</p>
 
-		<div class="flex w-full gap-8 justify-center mt-4">
-			<div>
+		<div class="flex w-full flex-wrap gap-8 justify-center items-center mt-4">
+			<div class="flex flex-col gap-3 max-w-md">
 				<p class="italic">A flavour of my toolset:</p>
-				<ul class="list-disc list-inside">
-					<li>TypeScript</li>
-					<li>React / React Native</li>
-					<li>Next.js</li>
-					<li>Node / NestJS</li>
-					<li>Python</li>
-					<li>Playwright</li>
-					<li>D3.js</li>
-					<li>Docker / AWS</li>
+				<ul class="flex flex-wrap gap-2">
+					{#each skills as skill}
+						<li
+							class="rounded-full border border-pale-cerulean/60 bg-bdazzled-blue-500/30 px-3 py-0.5 text-sm"
+						>
+							{skill}
+						</li>
+					{/each}
 				</ul>
 			</div>
 			<div class="w-auto h-48 offset-border">

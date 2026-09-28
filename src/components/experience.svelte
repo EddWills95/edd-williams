@@ -7,6 +7,7 @@
 			imageAlt: '',
 			title: 'Self Employed',
 			tagline: 'Inventing Mostly',
+			link: { text: 'inventing-mostly.com', url: 'https://inventing-mostly.com' },
 			client: {
 				name: 'Prodigies',
 				url: 'https://prodigiesofficial.com',
@@ -120,29 +121,18 @@
 			tech: ['React', 'GraphQL (Relay + Apollo)', 'Micro-Frontends', 'Groovy']
 		},
 		{
-			id: 'herts',
-			buttonText: 'Herts Uni',
-			image: './herts.webp',
-			imageAlt: 'herts logo',
-			title: 'University of Hertfordshire',
-			tagline: 'Internal Directory System rebuild',
-			highlights: ['Learn quickly', 'Directory had lots of customers and data'],
-			tech: ['Angular', 'React', 'GraphQL', 'Ruby on Rails']
-		},
-		{
-			id: 'wgc',
-			buttonText: 'We Got Coders',
-			image: './wgc.webp',
-			imageAlt: 'we got coders logo',
-			title: 'We Got Coders',
-			tagline: 'Intensive Ruby on Rails training course',
+			id: 'earlier',
+			buttonText: 'Earlier',
+			image: '',
+			imageAlt: '',
+			title: 'Earlier',
+			tagline: 'Getting started',
 			highlights: [
-				'Full stack training',
-				'On-site experience',
-				'SQL experiment days',
-				'Final crypto API project (CryptoCrowd)'
+				'University of Hertfordshire: rebuilt the internal directory system for a large user base and lots of data',
+				'We Got Coders: intensive Ruby on Rails course, finishing with a crypto API project (CryptoCrowd)',
+				'University of Exeter (Falmouth): 2:1 in Politics and International Relations, co-founded the Model United Nations Society'
 			],
-			tech: ['Ruby', 'Rails', 'SQL']
+			tech: ['Ruby', 'Rails', 'Angular', 'React', 'GraphQL', 'SQL']
 		}
 	];
 
@@ -201,6 +191,17 @@
 							</p>
 						</div>
 					</header>
+					{#if option.link}
+						<p class="text-base">
+							More of what I build at
+							<a
+								class="underline text-bdazzled-blue-100"
+								href={option.link.url}
+								target="_blank"
+								rel="noopener noreferrer">{option.link.text}</a
+							>
+						</p>
+					{/if}
 					{#if option.client}
 						<section class="flex flex-col gap-4 rounded border-2 border-pale-cerulean/30 p-4">
 							<div>

@@ -1,4 +1,18 @@
 <script>
+	import { onMount } from 'svelte';
+
+	const STATS_URL = 'https://energy.edd-williams.com/api/energy-stats';
+	let stats = null;
+
+	onMount(async () => {
+		try {
+			const res = await fetch(STATS_URL);
+			if (res.ok) stats = await res.json();
+		} catch {
+			stats = null;
+		}
+	});
+
 	function visitCode() {
 		window.open('https://github.com/EddWills95/edd-williams', '_blank');
 	}
@@ -6,10 +20,14 @@
 
 <section id="banner" class="section-no-padding relative text-2xl items-center justify-center">
 	<h1 class="flex flex-col gap-2">
-		<span class="text-base font-mono font-thin">Hey 👋<br /></span>
-		<span class="text-4xl text-burnt-sienna-400">I'm Edd <br /></span>
-		<span class="text-3xl flex-col gap-2 text-light-cyan"> I build cool things </span>
-		<div class="flex text-3xl text-light-cyan">
+		<span class="fade-up text-base font-mono font-thin">Hey 👋<br /></span>
+		<span class="fade-up text-4xl text-burnt-sienna-400" style="animation-delay: 0.15s"
+			>I'm Edd <br /></span
+		>
+		<span class="fade-up text-3xl flex-col gap-2 text-light-cyan" style="animation-delay: 0.3s">
+			I build cool things
+		</span>
+		<div class="fade-up flex text-3xl text-light-cyan" style="animation-delay: 0.45s">
 			<span class="ml-[94px] h-9 relative inline-block min-w-[220px]">
 				<span class="phrase-cycle absolute inset-0 whitespace-nowrap" style="animation-delay: 0s"
 					>for the web 🌐</span
@@ -38,6 +56,39 @@
 			</span>
 		</div>
 	</h1>
+
+	{#if stats}
+		<a
+			href="#home-lab"
+			class="fade-up mt-10 flex items-center gap-3 rounded-full border border-pale-cerulean/60 px-4 py-2 text-base hover:bg-bdazzled-blue-500/30 transition-colors"
+		>
+			<span class="relative flex h-2.5 w-2.5">
+				<span class="live-ping absolute inline-flex h-full w-full rounded-full bg-burnt-sienna-400"
+				></span>
+				<span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-burnt-sienna-400"></span>
+			</span>
+			<span
+				>Live from my house: 🔋 {stats.batterySoc}% · ☀️ {stats.solarGenerationTodayKwh.toFixed(1)} kWh
+				today</span
+			>
+		</a>
+	{/if}
+
+	<a
+		href="#about"
+		aria-label="Scroll to About"
+		class="scroll-cue absolute bottom-6 left-1/2 -translate-x-1/2 text-pale-cerulean"
+	>
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			class="h-6 w-6"
+			fill="none"
+			viewBox="0 0 24 24"
+			stroke="currentColor"
+			stroke-width="2"
+			><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg
+		>
+	</a>
 
 	<button
 		type="button"

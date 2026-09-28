@@ -9,26 +9,45 @@
 			imageAlt: 'get umbrel',
 			github: 'https://github.com/getumbrel/umbrel-dashboard/pulls?q=is%3Apr+author%3AEddWills95+',
 			url: 'https://getumbrel.com/'
+		}
+	];
+
+	const registry = [
+		{
+			name: 'Stash',
+			text: 'A mobile wardrobe app that builds outfits from the clothes you already own (coming soon)'
 		},
 		{
-			id: 'epsolar',
-			title: 'EPSolar Dashboard',
-			tagline: 'RaspberryPi Solar change controller',
-			text: 'Raspberry Pi dashboard that integrates with an EPSolar charge controller. Involved hardware serial investigations and experimentation',
-			image: './raspberry-pi.webp',
-			imageAlt: 'raspberry pi'
+			name: 'onvif-protect-bridge',
+			text: 'TypeScript bridge that shows ONVIF cameras as IP cameras in UniFi Protect'
 		},
 		{
-			id: 'pi-thermo',
-			title: 'Raspberry Pi Thermostat',
-			tagline: 'My first hardware/software project!',
-			text: 'A PHP, Javascript and Python thermostat using a DHT22 that switches a heating system on and off. While my presentation leaves a lot to be desired, I proved to myself that I was able to create useful projects using my own code. A real turning point in my life',
-			github: 'https://github.com/EddWills95/ThermoPi',
-			image: './thermo-pi.webp',
-			imageAlt: 'raspberry pi thermostat'
+			name: 'Backcast',
+			text: 'Next.js and Hono app simulating solar and battery performance against UK energy pricing (in progress)'
 		}
 	];
 </script>
+
+<a
+	href="https://inventing-mostly.com"
+	target="_blank"
+	rel="noopener noreferrer"
+	class="mb-10 p-6 flex flex-col gap-4 border-2 border-burnt-sienna-400 rounded hover:bg-burnt-sienna-400/10 transition-colors"
+>
+	<div>
+		<span class="text-sm uppercase tracking-widest text-burnt-sienna-400">Inventing Mostly</span>
+		<h3 class="text-2xl sm:text-3xl">Where I actually keep most of what I build →</h3>
+	</div>
+	<ul class="flex flex-col gap-3">
+		{#each registry as item}
+			<li class="leading-snug">
+				<span class="text-xl">{item.name}</span>
+				<span class="block text-base text-pale-cerulean">{item.text}</span>
+			</li>
+		{/each}
+	</ul>
+	<span class="italic text-base underline">inventing-mostly.com</span>
+</a>
 
 <div class="flex flex-col gap-10">
 	{#each projects as project}
@@ -73,14 +92,3 @@
 		</article>
 	{/each}
 </div>
-
-<a
-	href="https://inventing-mostly.com"
-	target="_blank"
-	rel="noopener noreferrer"
-	class="mt-10 p-6 flex flex-col gap-2 items-center text-center border-2 border-burnt-sienna-400 rounded hover:bg-burnt-sienna-400/10 transition-colors"
->
-	<span class="text-xl">More projects live at</span>
-	<span class="text-2xl text-burnt-sienna-400 underline">inventing-mostly.com →</span>
-	<span class="italic text-base">Where I actually keep most of what I build</span>
-</a>
