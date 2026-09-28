@@ -84,18 +84,19 @@
 	}
 
 	function commitsCaption({ commits, linesAdded }) {
-		if (commits === 0) return 'Nothing committed. Nothing to regret.';
+		if (commits === 0) return 'Nothing committed today. Living dangerously.';
 		if (commits === 1) return 'A single, lonely commit.';
 		if (linesAdded === 0) return 'Several commits, no new lines. Tidying up, then.';
 		const perCommit = linesAdded / commits;
-		if (perCommit >= 400) return `≈ ${count(perCommit)} lines a commit. Sorry, reviewers.`;
+		if (perCommit >= 400)
+			return `≈ ${count(perCommit)} lines a commit. Bring snacks to the review.`;
 		if (perCommit <= 20) return `≈ ${count(perCommit)} lines a commit. Small and tidy.`;
 		return `≈ ${count(perCommit)} lines a commit.`;
 	}
 
 	function cacheCaption({ cacheRead, written }) {
 		if (written === 0) return 'Yes, really.';
-		return `Yes, really: ${count(cacheRead / written)}× everything written. It rereads more than I do.`;
+		return `Yes, really: ${count(cacheRead / written)}× everything written. Its notes are better than mine.`;
 	}
 
 	const relative = new Intl.RelativeTimeFormat('en-GB', { numeric: 'auto' });
