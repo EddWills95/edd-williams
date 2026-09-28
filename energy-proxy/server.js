@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import { mapStats } from './map-stats.js';
+import { openBuildStats, tokenMatches, validateSnapshot } from './build-stats.js';
 
 // PaaS env-var UIs routinely round-trip pasted values with a trailing newline or stray
 // whitespace — trim each one so a copy-paste artifact doesn't silently break auth or
@@ -10,6 +12,10 @@ const HA_TOKEN = trim(process.env.HA_TOKEN);
 const PORT = trim(process.env.PORT) || 3001;
 const CACHE_TTL_SECONDS = trim(process.env.CACHE_TTL_SECONDS) || '600';
 const ALLOWED_ORIGINS = trim(process.env.ALLOWED_ORIGINS) || 'http://localhost:3000';
+const BUILD_STATS_TOKEN = trim(process.env.BUILD_STATS_TOKEN);
+const BUILD_STATS_DB = trim(process.env.BUILD_STATS_DB) || '/data/build-stats.db';
+const BUILD_STATS_TZ = trim(process.env.BUILD_STATS_TZ) || 'Europe/London';
+const GRID_EXPORT_IS_POSITIVE = trim(process.env.HA_GRID_POWER_SIGN) === 'export-positive';
 
 if (!HA_URL || !HA_TOKEN) {
 	console.error('HA_URL and HA_TOKEN must both be set. See .env.example.');
@@ -50,38 +56,52 @@ async function fetchEntityState(entityId) {
 	return res.json();
 }
 
-// Home Assistant reports this as a bare verb (DISCHARGE / CHARGE / IDLE); the UI wants the
-// gerund form ("Discharging · 401W"). Explicit map rather than string-mangling since it's a
-// small fixed set and a silent guess would be wrong for anything unexpected (e.g. IDLE).
-const BATTERY_ACTION_LABELS = {
-	DISCHARGE: 'Discharging',
-	CHARGE: 'Charging',
-	IDLE: 'Idle',
-	HOLD: 'Holding'
+// Optional extras: response key -> env var naming the entity to read. Unset = field omitted.
+// These are opt-in (rather than hard-coded like ENTITIES) so a new sensor can be wired up in
+// Dokploy without a code change, and so a missing/renamed sensor can never take the whole
+// endpoint down — the existing fields above keep working regardless.
+const OPTIONAL_ENTITY_ENV = {
+	solarPowerW: 'HA_ENTITY_SOLAR_POWER',
+	housePowerW: 'HA_ENTITY_HOUSE_POWER',
+	gridPowerW: 'HA_ENTITY_GRID_POWER',
+	batterySavingsToday: 'HA_ENTITY_SAVINGS_TODAY'
 };
 
-function batteryActionLabel(value) {
-	return BATTERY_ACTION_LABELS[value] ?? value ?? null;
-}
+const OPTIONAL_ENTITIES = Object.fromEntries(
+	Object.entries(OPTIONAL_ENTITY_ENV)
+		.map(([key, envVar]) => [key, trim(process.env[envVar])])
+		.filter(([, entityId]) => entityId)
+);
+
+console.log(
+	`Optional entities configured: ${Object.keys(OPTIONAL_ENTITIES).join(', ') || 'none'}`
+);
 
 async function fetchStats() {
 	const entries = Object.entries(ENTITIES);
-	const states = await Promise.all(entries.map(([, entityId]) => fetchEntityState(entityId)));
+	const optionalEntries = Object.entries(OPTIONAL_ENTITIES);
 
-	const raw = {};
+	const [states, optionalResults] = await Promise.all([
+		Promise.all(entries.map(([, entityId]) => fetchEntityState(entityId))),
+		Promise.allSettled(optionalEntries.map(([, entityId]) => fetchEntityState(entityId)))
+	]);
+
+	const required = {};
 	entries.forEach(([key], i) => {
-		raw[key] = states[i].state;
+		required[key] = states[i];
 	});
 
-	return {
-		batterySavingsTotal: Number((Number(raw.batterySavingsTotalPence) / 100).toFixed(2)),
-		solarGenerationTotalKwh: Number(Number(raw.solarGenerationTotalKwh).toFixed(1)),
-		solarGenerationTodayKwh: Number(Number(raw.solarGenerationTodayKwh).toFixed(2)),
-		batterySoc: Number(Number(raw.batterySoc).toFixed(1)),
-		batteryPowerW: Math.round(Number(raw.batteryPowerW)),
-		batteryAction: batteryActionLabel(raw.batteryAction),
-		asOf: new Date().toISOString()
-	};
+	const optional = {};
+	optionalEntries.forEach(([key], i) => {
+		const result = optionalResults[i];
+		if (result.status === 'fulfilled') {
+			optional[key] = result.value;
+		} else {
+			console.error(`Optional entity for ${key} failed, omitting it:`, result.reason.message);
+		}
+	});
+
+	return mapStats(required, optional, { gridExportIsPositive: GRID_EXPORT_IS_POSITIVE });
 }
 
 async function getStats() {
@@ -102,6 +122,20 @@ async function getStats() {
 	}
 }
 
+// Build stats are optional: if the token isn't set or the database can't be opened, the
+// energy endpoint carries on and only the build routes report unavailable.
+let buildStats = null;
+if (BUILD_STATS_TOKEN) {
+	try {
+		buildStats = openBuildStats(BUILD_STATS_DB, { timeZone: BUILD_STATS_TZ });
+		console.log(`Build stats enabled, database at ${BUILD_STATS_DB}`);
+	} catch (err) {
+		console.error(`Build stats disabled, could not open ${BUILD_STATS_DB}:`, err.message);
+	}
+} else {
+	console.log('Build stats disabled (BUILD_STATS_TOKEN not set)');
+}
+
 const app = express();
 app.use(cors({ origin: ALLOWED_ORIGINS.split(',').map((origin) => origin.trim()) }));
 
@@ -117,6 +151,36 @@ app.get('/api/energy-stats', async (_req, res) => {
 	} catch (err) {
 		console.error('Failed to fetch energy stats:', err.message);
 		res.status(502).json({ error: 'Failed to fetch energy stats' });
+	}
+});
+
+app.get('/api/build-stats', (_req, res) => {
+	const summary = buildStats?.summary();
+	if (!summary) return res.status(404).json({ error: 'No build stats yet' });
+	res.set('Cache-Control', 'public, max-age=300');
+	res.json(summary);
+});
+
+// Write endpoint for the Mac job. Not CORS-enabled for browsers in any useful way: it needs
+// the bearer token, which only the Mac holds.
+app.post('/api/build-stats', express.json({ limit: '64kb' }), (req, res) => {
+	if (!buildStats) return res.status(503).json({ error: 'Build stats not enabled' });
+
+	const header = req.get('Authorization') ?? '';
+	const provided = header.startsWith('Bearer ') ? header.slice(7).trim() : '';
+	if (!tokenMatches(provided, BUILD_STATS_TOKEN)) {
+		return res.status(401).json({ error: 'Unauthorized' });
+	}
+
+	const result = validateSnapshot(req.body);
+	if (!result.ok) return res.status(400).json({ error: result.error });
+
+	try {
+		buildStats.ingest(result.value);
+		res.json({ ok: true, days: result.value.days.length });
+	} catch (err) {
+		console.error('Failed to store build stats:', err.message);
+		res.status(500).json({ error: 'Failed to store build stats' });
 	}
 });
 
