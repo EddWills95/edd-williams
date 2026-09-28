@@ -1,4 +1,7 @@
 <script>
+	const WORDMARK_PRODIGIES =
+		'm118.602 15.11-2.922-2.624c-1.059-.972-1.44-1.44-1.44-2.793V6.096c0-.762.128-1.27.634-1.27.505 0 .678.508.678 1.27v5.334h5.968V7.238c0-4.697-2.285-7.238-6.56-7.238s-6.899 2.54-6.899 7.238v3.514c0 2.88.973 4.362 2.835 6.051l3.133 2.752c.973.848 1.353 1.184 1.353 2.496v3.853c0 .762-.169 1.27-.678 1.27-.464 0-.634-.508-.634-1.27v-5.46h-6.009v4.318c0 4.784 2.454 7.238 6.729 7.238s6.772-2.454 6.772-7.238v-3.133c0-3.261-.804-4.573-2.964-6.519zM95.53 31.66h11.004v-5.036h-4.697v-8.253h4.192V13.29h-4.192V5.376h4.697V.339H95.53zm-8.295 0h6.349V.34h-6.349zM78.643 0c-4.403 0-6.985 2.454-6.985 7.11v17.652c0 4.656 2.243 7.238 5.926 7.238 1.78 0 3.386-.931 3.936-2.202.592 1.524 1.904 1.904 3.853 1.904V15.62h-6.096v10.666c0 .509-.211.89-.634.89-.592 0-.678-.551-.678-1.313V6.138c0-.804.17-1.312.678-1.312.467 0 .634.508.634 1.312v6.857h6.096V7.11c0-4.656-2.33-7.11-6.73-7.11M63.405 31.66h6.349V.34h-6.35zM8.21.34H0v31.32h6.307V20.318h1.904c3.555 0 5.799-2.115 5.799-5.885v-8.17c0-3.81-2.244-5.926-5.799-5.926zm-.55 13.84c0 1.1-.211 1.522-.72 1.522h-.592V4.995h.592c.509 0 .72.423.72 1.482zm22.137 6.178c0-1.82-.467-3.26-2.454-4.275 1.987-.973 2.454-2.413 2.454-4.192V6.262c0-3.81-2.201-5.926-5.798-5.926h-8.211v31.322h6.349V18.493h.592c.508 0 .72.422.72 1.481v8.212c0 1.1.041 2.454.38 3.472h6.35c-.298-1.143-.382-2.33-.382-3.472v-7.83zm-6.348-8c0 1.06-.212 1.482-.72 1.482h-.592V4.995h.592c.508 0 .72.423.72 1.482v5.885zM55.744.34h-8.211v31.322h8.211c3.555 0 5.798-2.115 5.798-5.885V6.266c0-3.808-2.243-5.927-5.798-5.927m-.55 25.184c0 1.06-.212 1.482-.72 1.482h-.592V4.995h.592c.508 0 .72.423.72 1.482zM38.644 0c-4.4 0-6.983 2.454-6.983 7.11v17.776c0 4.656 2.582 7.11 6.982 7.11s6.986-2.454 6.986-7.11V7.11c0-4.656-2.624-7.11-6.986-7.11m.636 25.904c0 .762-.17 1.27-.634 1.27-.508 0-.678-.508-.678-1.27V6.096c0-.762.17-1.27.678-1.27.468 0 .634.508.634 1.27z';
+
 	const options = [
 		{
 			id: 'self-employed',
@@ -10,7 +13,7 @@
 			link: { text: 'inventing-mostly.com', url: 'https://inventing-mostly.com' },
 			client: {
 				name: 'Prodigies',
-				image: './prodigies.png',
+				wordmark: { viewBox: '0 0 125 32', path: WORDMARK_PRODIGIES },
 				url: 'https://prodigiesofficial.com',
 				description:
 					'A creative talent platform connecting designers, photographers, illustrators and other creatives with brands and agencies through profiles, portfolios, messaging and paid project briefs.',
@@ -206,15 +209,6 @@
 					{#if option.client}
 						<section class="flex flex-col gap-4 rounded border-2 border-pale-cerulean/30 p-4">
 							<div class="flex items-start gap-4">
-								{#if option.client.image}
-									<img
-										class="h-16 w-16 shrink-0 rounded-sm"
-										style="image-rendering: pixelated"
-										src={option.client.image}
-										alt="{option.client.name} logo"
-										loading="lazy"
-									/>
-								{/if}
 								<div>
 									<h4 class="text-sm uppercase tracking-widest text-burnt-sienna-400">Client</h4>
 									<h5 class="text-2xl">
@@ -222,8 +216,22 @@
 											class="hover:text-burnt-sienna-400 transition-colors"
 											href={option.client.url}
 											target="_blank"
-											rel="noopener noreferrer">{option.client.name}</a
+											rel="noopener noreferrer"
+											aria-label={option.client.name}
 										>
+											{#if option.client.wordmark}
+												<svg
+													class="h-7 w-auto"
+													viewBox={option.client.wordmark.viewBox}
+													aria-hidden="true"
+													focusable="false"
+												>
+													<path fill="currentColor" d={option.client.wordmark.path}></path>
+												</svg>
+											{:else}
+												{option.client.name}
+											{/if}
+										</a>
 									</h5>
 									<p class="text-base text-pale-cerulean">{option.client.description}</p>
 								</div>
