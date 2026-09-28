@@ -36,16 +36,16 @@
 
 		<hr class="section-break" />
 
-		<span class="anchor" id="projects"></span>
-		<section class="base-section justify-start">
-			<h2 class="text-2xl mb-4">More projects</h2>
-
-			<Projects />
-		</section>
+		<HomeLab />
 
 		<hr class="section-break" />
 
-		<HomeLab />
+		<span class="anchor" id="projects"></span>
+		<section class="base-section justify-start">
+			<h2 class="text-2xl mb-4">Projects</h2>
+
+			<Projects />
+		</section>
 
 		<hr class="section-break" />
 

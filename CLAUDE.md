@@ -34,4 +34,4 @@ Prettier config (`.prettierrc`): tabs, single quotes, no trailing commas, 100 pr
 
 ## Deployment
 
-Pushes to `main` trigger `.github/workflows/push-to-docker.yml`, which builds a multi-arch (amd64/arm64) Docker image via the `Dockerfile` (Node build stage → static files served by Nginx) and pushes it to Docker Hub as `eddwills95/edd-williams:latest`.
+There is no CI workflow in this repo (the Docker Hub push workflow was removed). The `Dockerfile` (Node build stage → static files served by Nginx) is built and deployed by Dokploy; trigger a deploy there after pushing to `main`.

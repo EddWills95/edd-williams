@@ -5,4 +5,12 @@
 			href="mailto:edd.williams@me.com?subject=Hi Edd 👋">edd.williams@me.com</a
 		>
 	</p>
+	<p>
+		Or find me on <a
+			class="underline text-bdazzled-blue-100"
+			href="https://github.com/EddWills95"
+			target="_blank"
+			rel="noopener noreferrer">GitHub</a
+		>
+	</p>
 </div>

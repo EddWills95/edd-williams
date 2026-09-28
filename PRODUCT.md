@@ -20,7 +20,7 @@ Edd is a hands-on builder, not just a software engineer who ships CRUD apps. The
 
 ## Operating Context
 
-- Statically built SvelteKit site (`adapter-static`), served via Nginx in Docker; deploys on push to `main` via GitHub Actions (`push-to-docker.yml`) to Docker Hub.
+- Statically built SvelteKit site (`adapter-static`), served via Nginx in Docker; built from the `Dockerfile` and deployed by Dokploy (no GitHub Actions workflow remains).
 - Edd runs a home lab (TrueNAS, Dokploy + Traefik, Home Assistant) that is a real source of content/evidence for this site, not just infrastructure metaphor.
 - A small proxy service (planned, to be hosted under the `edd-williams` project in Dokploy) will hold a restricted Home Assistant token server-side and expose a minimal public endpoint for live energy/battery stats — the site must never talk to Home Assistant directly or embed HA credentials client-side.
 

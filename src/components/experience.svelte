@@ -21,6 +21,7 @@
 		},
 		{
 			id: 'runna',
+			dates: '2025 – Present',
 			buttonText: 'Runna',
 			image: './runna.webp',
 			imageAlt: 'runna logo',
@@ -44,6 +45,7 @@
 		},
 		{
 			id: 'OakNorth',
+			dates: '2023 – 2025',
 			buttonText: 'OakNorth',
 			image: './oaknorth.webp',
 			imageAlt: 'oaknorth logo',
@@ -54,6 +56,7 @@
 				'Built onboarding flows that reduced time to first use from weeks to days',
 				'Designed and shipped a secure passcode recovery flow using biometrics',
 				'Core contributor to the React/React Native design system; resolved render performance issues in production',
+				'Set frontend testing standards, including accessibility-focused testing using ARIA roles',
 				'Co-led the frontend chapter, setting standards for TypeScript, testing and architecture'
 			],
 			tech: [
@@ -70,6 +73,7 @@
 		},
 		{
 			id: 'limejump',
+			dates: '2022 – 2023',
 			buttonText: 'Limejump',
 			image: './limejump.webp',
 			imageAlt: 'limejump logo',
@@ -85,6 +89,7 @@
 		},
 		{
 			id: 'ovo',
+			dates: '2022 – 2023',
 			buttonText: 'OVO',
 			image: './ovo.webp',
 			imageAlt: 'ovo logo',
@@ -100,6 +105,7 @@
 		},
 		{
 			id: 'quickbooks',
+			dates: '2018 – 2020',
 			buttonText: 'Quickbooks',
 			image: './qb.webp',
 			imageAlt: 'quickbooks logo',
@@ -127,7 +133,7 @@
 			id: 'wgc',
 			buttonText: 'We Got Coders',
 			image: './wgc.webp',
-			imageAlt: 'quickbooks logo',
+			imageAlt: 'we got coders logo',
 			title: 'We Got Coders',
 			tagline: 'Intensive Ruby on Rails training course',
 			highlights: [
@@ -143,13 +149,15 @@
 	let selected = options[0];
 </script>
 
-<div class="flex gap-4 sm:gap-8">
-	<ol class="flex flex-col self-start shrink-0 w-28 sm:w-44">
+<div class="flex flex-col gap-6 sm:flex-row sm:gap-8">
+	<ol
+		class="flex flex-row overflow-x-auto sm:flex-col sm:overflow-visible sm:self-start shrink-0 sm:w-44"
+	>
 		{#each options as option, i}
 			<li class="relative">
 				<span
 					aria-hidden="true"
-					class="absolute left-0 -ml-px w-0.5 bg-pale-cerulean/60 {i === 0
+					class="hidden sm:block absolute left-0 -ml-px w-0.5 bg-pale-cerulean/60 {i === 0
 						? 'top-1/2'
 						: 'top-0'} {i === options.length - 1 ? 'bottom-1/2' : 'bottom-0'}"
 				></span>
@@ -157,13 +165,16 @@
 					type="button"
 					on:click={() => (selected = option)}
 					aria-current={selected.id === option.id}
-					class="timeline-item group relative w-full py-3 pl-6 text-left origin-left transition-all duration-200 hover:scale-110 hover:cursor-pointer"
+					class="timeline-item group relative w-full whitespace-nowrap px-3 py-2 text-left origin-left transition-all duration-200 hover:cursor-pointer sm:whitespace-normal sm:py-3 sm:pl-6 sm:hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-pale-cerulean rounded-sm"
 					class:timeline-selected={selected.id === option.id}
 				>
 					<span
-						class="timeline-dot absolute top-1/2 -left-[9px] h-4 w-4 -translate-y-1/2 rounded-full border-2 border-pale-cerulean bg-gunmetal transition-all duration-200 group-hover:scale-125 group-hover:border-burnt-sienna-400"
+						class="timeline-dot hidden sm:block absolute top-1/2 -left-[9px] h-4 w-4 -translate-y-1/2 rounded-full border-2 border-pale-cerulean bg-gunmetal transition-all duration-200 group-hover:scale-125 group-hover:border-burnt-sienna-400"
 					></span>
 					<span class="block text-base sm:text-lg leading-tight">{option.buttonText}</span>
+					{#if option.dates}
+						<span class="block text-xs text-pale-cerulean">{option.dates}</span>
+					{/if}
 				</button>
 			</li>
 		{/each}
@@ -171,7 +182,7 @@
 	<div class="min-w-0 flex-1">
 		{#each options as option}
 			{#if selected.id === option.id}
-				<article class="experience-panel flex flex-col gap-6 py-1">
+				<article class="experience-panel flex flex-col gap-6 py-1 sm:min-h-[26rem]">
 					<header class="flex items-center gap-5 border-b-2 border-pale-cerulean/30 pb-5">
 						{#if option.image}
 							<div class="offset-border shrink-0">
@@ -185,7 +196,9 @@
 						{/if}
 						<div class="min-w-0">
 							<h3 class="text-2xl sm:text-3xl leading-tight">{option.title}</h3>
-							<p class="italic text-pale-cerulean">{option.tagline}</p>
+							<p class="italic text-pale-cerulean">
+								{option.tagline}{option.dates ? ` · ${option.dates}` : ''}
+							</p>
 						</div>
 					</header>
 					{#if option.client}

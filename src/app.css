@@ -63,8 +63,20 @@ body {
 	top: -13px;
 }
 
+.timeline-item {
+	border-bottom: 2px solid transparent;
+}
+
 .timeline-selected {
 	@apply font-semibold text-burnt-sienna-400;
+	border-bottom-color: var(--burnt-sienna);
+}
+
+@media (min-width: 640px) {
+	.timeline-item,
+	.timeline-selected {
+		border-bottom-color: transparent;
+	}
 }
 
 .timeline-selected .timeline-dot {
