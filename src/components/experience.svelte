@@ -125,17 +125,18 @@
 </script>
 
 <div class="overflow-scroll flex w-full">
-	{#each options as option, i}
-		<div
+	{#each options as option}
+		<button
+			type="button"
 			on:click={() => (selected = option)}
 			class="h-16 min-w-[150px] flex flex-1 justify-center items-center text-center border-l-2 last:border-r-2 hover:cursor-pointer"
 			class:experience-selected={selected.id === option.id}
 		>
 			{option.buttonText}
-		</div>
+		</button>
 	{/each}
 </div>
-{#each options as option, i}
+{#each options as option}
 	<div class={`p-4 mt-4 flex flex-col gap-2 ${selected.id === option.id ? 'flex' : 'hidden'}`}>
 		<div class="flex gap-8 flex-wrap justify-center items-center">
 			<div class="flex flex-col justify-center">

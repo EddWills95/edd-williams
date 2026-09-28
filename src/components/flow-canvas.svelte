@@ -106,4 +106,4 @@
 	});
 </script>
 
-<div bind:this={mountEl} class="absolute inset-0 pointer-events-none [&>canvas]:!block" />
+<div bind:this={mountEl} class="absolute inset-0 pointer-events-none [&>canvas]:!block"></div>

@@ -50,7 +50,12 @@
 >
 	<div class="flex justify-between">
 		<EddHome handler={handleCloseMenu} />
-		<button on:click={handleCloseMenu} class="absolute right-4 top-4">
+		<button
+			type="button"
+			aria-label="Close menu"
+			on:click={handleCloseMenu}
+			class="absolute right-4 top-4"
+		>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				class="h-6 w-6"
@@ -108,7 +113,7 @@
 	<EddHome />
 
 	<!-- Mobile -->
-	<button on:click={handleOpenMenu} class="sm:hidden">
+	<button type="button" aria-label="Open menu" on:click={handleOpenMenu} class="sm:hidden">
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
 			class="h-6 w-6"

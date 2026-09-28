@@ -18,7 +18,7 @@
 
 		<hr class="section-break" />
 
-		<span class="anchor" id="about" />
+		<span class="anchor" id="about"></span>
 		<section class="base-section justify-start">
 			<h2 class="text-2xl mb-4">Me, Myself and I</h2>
 
@@ -27,7 +27,7 @@
 
 		<hr class="section-break" />
 
-		<span class="anchor" id="experience" />
+		<span class="anchor" id="experience"></span>
 		<section class="base-section justify-start">
 			<h2 class="text-2xl mb-4">Experience</h2>
 
@@ -36,7 +36,7 @@
 
 		<hr class="section-break" />
 
-		<span class="anchor" id="projects" />
+		<span class="anchor" id="projects"></span>
 		<section class="base-section justify-start">
 			<h2 class="text-2xl mb-4">More projects</h2>
 
@@ -49,7 +49,7 @@
 
 		<hr class="section-break" />
 
-		<span class="anchor" id="contact" />
+		<span class="anchor" id="contact"></span>
 		<section class="min-h-[200px] flex flex-col justify-start items-center">
 			<h2 class="text-2xl mb-4 underline">Contact</h2>
 

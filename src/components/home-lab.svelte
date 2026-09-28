@@ -22,7 +22,7 @@
 	$: socDeg = stats ? (stats.batterySoc / 100) * 360 : 0;
 </script>
 
-<span class="anchor" id="home-lab" />
+<span class="anchor" id="home-lab"></span>
 <section class="base-section justify-start">
 	<h2 class="text-2xl mb-4">Home Lab</h2>
 
