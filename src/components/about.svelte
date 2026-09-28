@@ -34,7 +34,7 @@
 			<span class="italic text-burnt-sienna-400">repurposing</span> and
 			<span class="italic text-burnt-sienna-400">upcycling</span> batteries, and I don't think the
 			importance of energy storage can be overstated. The numbers in the Home Lab below are live
-			from my house.
+			from my flat.
 			<span class="hidden lg:block text-2xl absolute -left-12 top-0">
 				<svg class="inline ml-2" xmlns="http://www.w3.org/2000/svg" width="32" height="32"
 					><g fill="none" fill-rule="evenodd"

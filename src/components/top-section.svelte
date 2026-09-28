@@ -68,7 +68,7 @@
 				<span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-burnt-sienna-400"></span>
 			</span>
 			<span
-				>Live from my house: 🔋 {stats.batterySoc}% · ☀️ {stats.solarGenerationTodayKwh.toFixed(1)} kWh
+				>Live from my flat: 🔋 {stats.batterySoc}% · ☀️ {stats.solarGenerationTodayKwh.toFixed(1)} kWh
 				today</span
 			>
 		</a>
