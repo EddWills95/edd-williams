@@ -63,8 +63,19 @@ body {
 	top: -13px;
 }
 
-.experience-selected {
-	@apply bg-bdazzled-blue-500 shadow-inner;
+.timeline-selected {
+	@apply font-semibold text-burnt-sienna-400;
+}
+
+.timeline-selected .timeline-dot {
+	@apply bg-burnt-sienna-400 border-burnt-sienna-400 scale-125;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.timeline-item,
+	.timeline-item * {
+		transition: none;
+	}
 }
 
 .auto-margin {
@@ -99,5 +110,22 @@ body {
 	}
 	.phrase-cycle:first-child {
 		opacity: 1;
+	}
+}
+
+@keyframes panel-in {
+	from {
+		opacity: 0;
+		transform: translateX(8px);
+	}
+}
+
+.experience-panel {
+	animation: panel-in 0.25s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.experience-panel {
+		animation: none;
 	}
 }

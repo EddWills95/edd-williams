@@ -1,6 +1,25 @@
 <script>
 	const options = [
 		{
+			id: 'self-employed',
+			buttonText: 'Self Employed',
+			image: '',
+			imageAlt: '',
+			title: 'Self Employed',
+			tagline: 'Inventing Mostly',
+			client: {
+				name: 'Prodigies',
+				url: 'https://prodigiesofficial.com',
+				description:
+					'A creative talent platform connecting designers, photographers, illustrators and other creatives with brands and agencies through profiles, portfolios, messaging and paid project briefs.',
+				highlights: [
+					'Rebuilding the platform back end, migrating from Directus to Supabase',
+					'Working across the Next.js and React front end alongside the new back end'
+				],
+				tech: ['Next.js', 'React', 'TypeScript', 'Supabase', 'Directus', 'Tailwind CSS']
+			}
+		},
+		{
 			id: 'runna',
 			buttonText: 'Runna',
 			image: './runna.webp',
@@ -124,49 +143,121 @@
 	let selected = options[0];
 </script>
 
-<div class="overflow-scroll flex w-full">
-	{#each options as option}
-		<button
-			type="button"
-			on:click={() => (selected = option)}
-			class="h-16 min-w-[150px] flex flex-1 justify-center items-center text-center border-l-2 last:border-r-2 hover:cursor-pointer"
-			class:experience-selected={selected.id === option.id}
-		>
-			{option.buttonText}
-		</button>
-	{/each}
-</div>
-{#each options as option}
-	<div class={`p-4 mt-4 flex flex-col gap-2 ${selected.id === option.id ? 'flex' : 'hidden'}`}>
-		<div class="flex gap-8 flex-wrap justify-center items-center">
-			<div class="flex flex-col justify-center">
-				<h3 class="text-3xl">{option.title}</h3>
-				<p class="italic">{option.tagline}</p>
-			</div>
-			<div class="offset-border">
-				<img
-					class="rounded-sm object-cover w-auto h-24"
-					src={option.image}
-					alt={option.imageAlt}
-					loading="lazy"
-				/>
-			</div>
-		</div>
-		<div>
-			<h4 class="underline text-sm text-burnt-sienna-400">Highlights</h4>
-			<ul class="list-disc list-inside">
-				{#each option.highlights as highlight}
-					<li>{highlight}</li>
-				{/each}
-			</ul>
-		</div>
-		<div>
-			<h4 class="underline text-sm text-burnt-sienna-400">Tech</h4>
-			<ul class="list-disc list-inside">
-				{#each option.tech as tech}
-					<li>{tech}</li>
-				{/each}
-			</ul>
-		</div>
+<div class="flex gap-4 sm:gap-8">
+	<ol class="flex flex-col self-start shrink-0 w-28 sm:w-44">
+		{#each options as option, i}
+			<li class="relative">
+				<span
+					aria-hidden="true"
+					class="absolute left-0 -ml-px w-0.5 bg-pale-cerulean/60 {i === 0
+						? 'top-1/2'
+						: 'top-0'} {i === options.length - 1 ? 'bottom-1/2' : 'bottom-0'}"
+				></span>
+				<button
+					type="button"
+					on:click={() => (selected = option)}
+					aria-current={selected.id === option.id}
+					class="timeline-item group relative w-full py-3 pl-6 text-left origin-left transition-all duration-200 hover:scale-110 hover:cursor-pointer"
+					class:timeline-selected={selected.id === option.id}
+				>
+					<span
+						class="timeline-dot absolute top-1/2 -left-[9px] h-4 w-4 -translate-y-1/2 rounded-full border-2 border-pale-cerulean bg-gunmetal transition-all duration-200 group-hover:scale-125 group-hover:border-burnt-sienna-400"
+					></span>
+					<span class="block text-base sm:text-lg leading-tight">{option.buttonText}</span>
+				</button>
+			</li>
+		{/each}
+	</ol>
+	<div class="min-w-0 flex-1">
+		{#each options as option}
+			{#if selected.id === option.id}
+				<article class="experience-panel flex flex-col gap-6 py-1">
+					<header class="flex items-center gap-5 border-b-2 border-pale-cerulean/30 pb-5">
+						{#if option.image}
+							<div class="offset-border shrink-0">
+								<img
+									class="rounded-sm object-cover w-auto h-16 sm:h-20"
+									src={option.image}
+									alt={option.imageAlt}
+									loading="lazy"
+								/>
+							</div>
+						{/if}
+						<div class="min-w-0">
+							<h3 class="text-2xl sm:text-3xl leading-tight">{option.title}</h3>
+							<p class="italic text-pale-cerulean">{option.tagline}</p>
+						</div>
+					</header>
+					{#if option.client}
+						<section class="flex flex-col gap-4 rounded border-2 border-pale-cerulean/30 p-4">
+							<div>
+								<h4 class="text-sm uppercase tracking-widest text-burnt-sienna-400">Client</h4>
+								<h5 class="text-2xl">
+									<a
+										class="hover:text-burnt-sienna-400 transition-colors"
+										href={option.client.url}
+										target="_blank"
+										rel="noopener noreferrer">{option.client.name}</a
+									>
+								</h5>
+								<p class="text-base text-pale-cerulean">{option.client.description}</p>
+							</div>
+							<ul class="flex flex-col gap-2">
+								{#each option.client.highlights as highlight}
+									<li class="flex gap-3 leading-snug">
+										<span
+											aria-hidden="true"
+											class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-burnt-sienna-400"
+										></span>
+										<span>{highlight}</span>
+									</li>
+								{/each}
+							</ul>
+							<ul class="flex flex-wrap gap-2">
+								{#each option.client.tech as tech}
+									<li
+										class="rounded-full border border-pale-cerulean/60 bg-bdazzled-blue-500/30 px-3 py-0.5 text-sm"
+									>
+										{tech}
+									</li>
+								{/each}
+							</ul>
+						</section>
+					{/if}
+					{#if option.highlights?.length}
+						<section>
+							<h4 class="mb-2 text-sm uppercase tracking-widest text-burnt-sienna-400">
+								Highlights
+							</h4>
+							<ul class="flex flex-col gap-2">
+								{#each option.highlights as highlight}
+									<li class="flex gap-3 leading-snug">
+										<span
+											aria-hidden="true"
+											class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-burnt-sienna-400"
+										></span>
+										<span>{highlight}</span>
+									</li>
+								{/each}
+							</ul>
+						</section>
+					{/if}
+					{#if option.tech?.length}
+						<section>
+							<h4 class="mb-2 text-sm uppercase tracking-widest text-burnt-sienna-400">Tech</h4>
+							<ul class="flex flex-wrap gap-2">
+								{#each option.tech as tech}
+									<li
+										class="rounded-full border border-pale-cerulean/60 bg-bdazzled-blue-500/30 px-3 py-0.5 text-sm"
+									>
+										{tech}
+									</li>
+								{/each}
+							</ul>
+						</section>
+					{/if}
+				</article>
+			{/if}
+		{/each}
 	</div>
-{/each}
+</div>
