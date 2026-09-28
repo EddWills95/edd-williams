@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+	Template for the build-stats LaunchAgent. install.sh fills in the __PLACEHOLDERS__ and writes
+	the result to ~/Library/LaunchAgents. No secrets belong here: the job reads its bearer token
+	from the Keychain (service "build-stats-token") at run time.
+-->
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.edd-williams.build-stats</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>__NODE__</string>
+		<string>__JOB__</string>
+	</array>
+	<key>WorkingDirectory</key>
+	<string>__DIR__</string>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PATH</key>
+		<string>__PATH__</string>
+	</dict>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>StartInterval</key>
+	<integer>3600</integer>
+	<key>LowPriorityIO</key>
+	<true/>
+	<key>Nice</key>
+	<integer>10</integer>
+	<key>StandardOutPath</key>
+	<string>__LOGS__/build-stats.log</string>
+	<key>StandardErrorPath</key>
+	<string>__LOGS__/build-stats.log</string>
+</dict>
+</plist>

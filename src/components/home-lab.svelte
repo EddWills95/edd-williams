@@ -1,6 +1,7 @@
 <script>
 	import { onMount, onDestroy } from 'svelte';
 	import FlatDrawing from './home-lab-flat.svelte';
+	import BuildSheet from './home-lab-build.svelte';
 
 	const STATS_URL = 'https://energy.edd-williams.com/api/energy-stats';
 	// The proxy caches for 10 minutes; well past that, the flat has stopped checking in.
@@ -267,6 +268,8 @@
 			{/if}
 		</figcaption>
 	</figure>
+
+	<BuildSheet />
 </section>
 
 <style>

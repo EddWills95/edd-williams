@@ -50,3 +50,54 @@ export function mockStats(variant) {
 	if (variant === 'loading') return new Promise(() => {});
 	return Promise.resolve((variants[variant] ?? variants[1])());
 }
+
+// Build-stats fixtures, selected with `?mockbuild=<variant>` (or any `?mock=`, which uses
+// `normal`). Same rule: DEV-ONLY, invented numbers, labelled as mock in the UI.
+//
+//   ?mockbuild=normal  a typical day
+//   ?mockbuild=stale   laptop hasn't synced for a few days
+//   ?mockbuild=none    404, as in production before the first push (panel hidden)
+//   ?mockbuild=big     very large totals, to check nothing overflows
+//   ?mockbuild=zeros   a first day with nothing recorded yet
+
+const buildWindow = (written, cacheRead, linesAdded, linesRemoved, commits) => ({
+	written,
+	cacheRead,
+	linesAdded,
+	linesRemoved,
+	commits
+});
+
+const buildVariants = {
+	normal: () => ({
+		asOf: minutesAgo(12),
+		stale: false,
+		today: buildWindow(687_856, 61_204_117, 1_204, 388, 7),
+		week: buildWindow(2_431_902, 402_118_553, 5_310, 1_122, 31),
+		lifetime: buildWindow(9_118_470, 3_962_429_899, 48_210, 13_407, 312)
+	}),
+	stale: () => ({
+		...buildVariants.normal(),
+		asOf: minutesAgo(60 * 70),
+		stale: true
+	}),
+	big: () => ({
+		asOf: minutesAgo(3),
+		stale: false,
+		today: buildWindow(14_902_331, 1_204_993_201, 38_114, 41_920, 64),
+		week: buildWindow(88_120_004, 9_812_004_551, 210_442, 99_310, 402),
+		lifetime: buildWindow(912_004_118, 98_120_441_337, 2_104_993, 1_020_441, 9_812)
+	}),
+	zeros: () => ({
+		asOf: minutesAgo(1),
+		stale: false,
+		today: buildWindow(0, 0, 0, 0, 0),
+		week: buildWindow(0, 0, 0, 0, 0),
+		lifetime: buildWindow(0, 0, 0, 0, 0)
+	})
+};
+
+export function mockBuildStats(variant) {
+	if (variant === 'none') return Promise.reject(new Error('mock: 404, no build stats yet'));
+	return Promise.resolve((buildVariants[variant] ?? buildVariants.normal)());
+}

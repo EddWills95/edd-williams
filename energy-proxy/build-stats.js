@@ -1,12 +1,23 @@
-// Build stats: token totals pushed from the Mac, stored as one row per day in a SQLite file.
-// Pure-ish module (no express, no env) so it can be exercised on its own with a temp database.
+// Build stats: token and git totals pushed from the Mac, stored as one row per day in a SQLite
+// file. Pure-ish module (no express, no env) so it can be exercised on its own with a temp database.
 import { DatabaseSync } from 'node:sqlite';
 import { createHash, timingSafeEqual } from 'node:crypto';
 
 const DAY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const MAX_DAYS_PER_PUSH = 400;
-const MAX_COUNT = 1e13; // sanity ceiling; far above any real token count
+const MAX_COUNT = 1e13; // sanity ceiling; far above any real token or line count
 const STALE_AFTER_MS = 48 * 60 * 60 * 1000;
+
+// Per-day counters: payload key -> column. `written` and `cacheRead` are required in a POST;
+// the git counters are optional (default 0) so a job from before they existed still validates.
+const COUNTERS = [
+	{ key: 'written', column: 'written', required: true },
+	{ key: 'cacheRead', column: 'cache_read', required: true },
+	{ key: 'linesAdded', column: 'lines_added', required: false },
+	{ key: 'linesRemoved', column: 'lines_removed', required: false },
+	{ key: 'commits', column: 'commits', required: false }
+];
+const ADDED_COLUMNS = COUNTERS.filter((c) => !c.required).map((c) => c.column);
 
 // Compare secrets without leaking length or position through timing: hash first so both
 // buffers are always the same size.
@@ -29,7 +40,8 @@ function isRealDay(day) {
 
 /**
  * Validates an incoming snapshot. Returns { ok: true, value } or { ok: false, error }.
- * Expected shape: { asOf: ISO string, days: [{ day: 'YYYY-MM-DD', written: int, cacheRead: int }] }
+ * Expected shape: { asOf: ISO string, days: [{ day: 'YYYY-MM-DD', written: int, cacheRead: int,
+ * linesAdded?: int, linesRemoved?: int, commits?: int }] }. Missing optional counters become 0.
  */
 export function validateSnapshot(body, now = new Date()) {
 	if (!body || typeof body !== 'object') return { ok: false, error: 'body must be an object' };
@@ -54,11 +66,16 @@ export function validateSnapshot(body, now = new Date()) {
 	for (const entry of body.days) {
 		if (!entry || !isRealDay(entry.day)) return { ok: false, error: 'each day must be YYYY-MM-DD' };
 		if (seen.has(entry.day)) return { ok: false, error: `duplicate day ${entry.day}` };
-		if (!isCount(entry.written) || !isCount(entry.cacheRead)) {
-			return { ok: false, error: `written and cacheRead must be non-negative integers (${entry.day})` };
+		const day = { day: entry.day };
+		for (const { key, required } of COUNTERS) {
+			const value = entry[key] === undefined && !required ? 0 : entry[key];
+			if (!isCount(value)) {
+				return { ok: false, error: `${key} must be a non-negative integer (${entry.day})` };
+			}
+			day[key] = value;
 		}
 		seen.add(entry.day);
-		days.push({ day: entry.day, written: entry.written, cacheRead: entry.cacheRead });
+		days.push(day);
 	}
 
 	return { ok: true, value: { asOf: asOf.toISOString(), days } };
@@ -75,8 +92,27 @@ function shiftDay(day, delta) {
 	return d.toISOString().slice(0, 10);
 }
 
+// Adds columns introduced after the first deploy to an existing database. Checks the schema
+// first, so it is a no-op on a fresh or already-migrated database and safe to run every start.
+function migrate(db) {
+	const existing = new Set(db.prepare(`PRAGMA table_info(daily_tokens)`).all().map((c) => c.name));
+	for (const column of ADDED_COLUMNS) {
+		if (!existing.has(column)) {
+			db.exec(`ALTER TABLE daily_tokens ADD COLUMN ${column} INTEGER NOT NULL DEFAULT 0`);
+		}
+	}
+}
+
+function toWindow(row) {
+	const window = {};
+	for (const { key, column } of COUNTERS) window[key] = row?.[column] ?? 0;
+	return window;
+}
+
 export function openBuildStats(path, { timeZone = 'Europe/London' } = {}) {
 	const db = new DatabaseSync(path);
+	// The table keeps its original name: it now holds git counters too, but renaming it would
+	// make the migration riskier for no gain.
 	db.exec(`
 		PRAGMA journal_mode = WAL;
 		CREATE TABLE IF NOT EXISTS daily_tokens (
@@ -89,14 +125,17 @@ export function openBuildStats(path, { timeZone = 'Europe/London' } = {}) {
 			value TEXT NOT NULL
 		);
 	`);
+	migrate(db);
 
-	// max() per day: a day's total can only grow, so a re-run, a retry or a Mac whose logs
-	// have since been pruned can never lower or double count what's already stored.
+	const columns = COUNTERS.map((c) => c.column);
+
+	// max() per column per day: a day's totals can only grow, so a re-run, a retry or a Mac whose
+	// logs have since been pruned can never lower or double count what's already stored.
 	const upsertDay = db.prepare(`
-		INSERT INTO daily_tokens (day, written, cache_read) VALUES (?, ?, ?)
+		INSERT INTO daily_tokens (day, ${columns.join(', ')})
+		VALUES (?, ${columns.map(() => '?').join(', ')})
 		ON CONFLICT(day) DO UPDATE SET
-			written = max(written, excluded.written),
-			cache_read = max(cache_read, excluded.cache_read)
+			${columns.map((c) => `${c} = max(${c}, excluded.${c})`).join(',\n\t\t\t')}
 	`);
 	const setMeta = db.prepare(`
 		INSERT INTO meta (key, value) VALUES (?, ?)
@@ -104,15 +143,15 @@ export function openBuildStats(path, { timeZone = 'Europe/London' } = {}) {
 	`);
 	const getAsOf = db.prepare(`SELECT value FROM meta WHERE key = 'asOf'`);
 	const sumSince = db.prepare(`
-		SELECT COALESCE(SUM(written), 0) AS written, COALESCE(SUM(cache_read), 0) AS cache_read
+		SELECT ${columns.map((c) => `COALESCE(SUM(${c}), 0) AS ${c}`).join(', ')}
 		FROM daily_tokens WHERE day >= ?
 	`);
-	const sumDay = db.prepare(`SELECT written, cache_read FROM daily_tokens WHERE day = ?`);
+	const sumDay = db.prepare(`SELECT ${columns.join(', ')} FROM daily_tokens WHERE day = ?`);
 
 	function ingest({ asOf, days }) {
 		db.exec('BEGIN');
 		try {
-			for (const d of days) upsertDay.run(d.day, d.written, d.cacheRead);
+			for (const d of days) upsertDay.run(d.day, ...COUNTERS.map((c) => d[c.key] ?? 0));
 			const previous = getAsOf.get()?.value;
 			// asOf only moves forward, so an out-of-order retry can't make the data look older.
 			if (!previous || asOf > previous) setMeta.run('asOf', asOf);
@@ -128,19 +167,23 @@ export function openBuildStats(path, { timeZone = 'Europe/London' } = {}) {
 		const asOf = getAsOf.get()?.value;
 		if (!asOf) return null;
 
-		const today = dayInZone(now, timeZone);
-		const todayRow = sumDay.get(today);
-		const week = sumSince.get(shiftDay(today, -6)); // rolling seven days including today
-		const lifetime = sumSince.get('0000-01-01');
+		const todayDay = dayInZone(now, timeZone);
+		const today = toWindow(sumDay.get(todayDay));
+		const week = toWindow(sumSince.get(shiftDay(todayDay, -6))); // rolling seven days incl. today
+		const lifetime = toWindow(sumSince.get('0000-01-01'));
 
 		return {
-			tokensWrittenToday: todayRow?.written ?? 0,
+			asOf,
+			stale: now.getTime() - new Date(asOf).getTime() > STALE_AFTER_MS,
+			today,
+			week,
+			lifetime,
+			// Flat fields from the first version of the endpoint, kept for older clients.
+			tokensWrittenToday: today.written,
 			tokensWrittenWeek: week.written,
 			tokensWrittenLifetime: lifetime.written,
-			tokensCacheReadToday: todayRow?.cache_read ?? 0,
-			tokensCacheReadLifetime: lifetime.cache_read,
-			asOf,
-			stale: now.getTime() - new Date(asOf).getTime() > STALE_AFTER_MS
+			tokensCacheReadToday: today.cacheRead,
+			tokensCacheReadLifetime: lifetime.cacheRead
 		};
 	}
 

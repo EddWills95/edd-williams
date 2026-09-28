@@ -78,9 +78,53 @@ other self-hosted services), built from this `energy-proxy/` subdirectory via th
 
 ## Build stats
 
-`POST /api/build-stats` (bearer `BUILD_STATS_TOKEN`) accepts per-day token totals pushed from the
-Mac; `GET /api/build-stats` serves today / rolling week / lifetime sums. Data lives in a SQLite
-file at `BUILD_STATS_DB` (default `/data/build-stats.db`), on the `energy-proxy-data` volume
-declared in `docker-compose.yml`. Without that volume the file is lost on every redeploy.
-Days only ever grow (`max()` per day), so re-sending is safe. Requires Node 22+ (`node:sqlite`).
-Run tests with `node --test build-stats.test.js`.
+`POST /api/build-stats` (bearer `BUILD_STATS_TOKEN`) accepts per-day totals pushed from the Mac by
+`scripts/build-stats/` in the repo root:
+
+```json
+{
+	"asOf": "2026-09-28T20:00:00.000Z",
+	"days": [
+		{
+			"day": "2026-09-28",
+			"written": 5700000,
+			"cacheRead": 297000000,
+			"linesAdded": 13854,
+			"linesRemoved": 1949,
+			"commits": 33
+		}
+	]
+}
+```
+
+`written` and `cacheRead` are required; `linesAdded`, `linesRemoved` and `commits` are optional
+(default 0) so an older job still validates. All are non-negative integers; at most 400 days per
+POST, and `asOf` may not be in the future.
+
+`GET /api/build-stats` serves today, the rolling seven days including today, and lifetime sums,
+counted in `BUILD_STATS_TZ` (default `Europe/London`). It 404s until the first push.
+
+```json
+{
+	"asOf": "2026-09-28T20:00:00.000Z",
+	"stale": false,
+	"today": { "written": 0, "cacheRead": 0, "linesAdded": 0, "linesRemoved": 0, "commits": 0 },
+	"week": { "written": 0, "cacheRead": 0, "linesAdded": 0, "linesRemoved": 0, "commits": 0 },
+	"lifetime": { "written": 0, "cacheRead": 0, "linesAdded": 0, "linesRemoved": 0, "commits": 0 },
+	"tokensWrittenToday": 0,
+	"tokensWrittenWeek": 0,
+	"tokensWrittenLifetime": 0,
+	"tokensCacheReadToday": 0,
+	"tokensCacheReadLifetime": 0
+}
+```
+
+The flat `tokens*` fields are from the first version and kept for compatibility. `stale` is true
+when `asOf` is over 48 hours old.
+
+Data lives in a SQLite file at `BUILD_STATS_DB` (default `/data/build-stats.db`), on the
+`energy-proxy-data` volume declared in `docker-compose.yml`. Without that volume the file is lost
+on every redeploy. Each column of each day only ever grows (`max()` per column), so re-sending is
+safe. Columns added after the first deploy are added to an existing database on startup
+(`ALTER TABLE ... ADD COLUMN ... DEFAULT 0`, skipped when already present). Requires Node 22+
+(`node:sqlite`). Run tests with `yarn test` (or `node --test build-stats.test.js`).

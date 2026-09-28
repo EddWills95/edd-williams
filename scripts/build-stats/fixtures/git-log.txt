@@ -1,0 +1,19 @@
+aaa111Edd.Williams@me.com2026-09-28
+
+12	3	src/app.js
+5	0	src/{old => new}/thing.ts
+900	800	yarn.lock
+40	0	web/dist/bundle.js
+7	0	vendor.min.js
+-	-	static/logo.webp
+9000	0	data/vectors.json
+1	9000	data/old.json
+3	1	docs/"odd name.md"
+bbb222someone@else.com2026-09-28
+
+100	0	src/theirs.js
+ccc333edd.williams@me.com2026-09-27
+
+2	2	src/__snapshots__/a.test.js.snap
+4	1	README.md
+ddd444edd.williams@me.com2026-09-27

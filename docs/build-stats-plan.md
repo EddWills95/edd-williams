@@ -94,19 +94,34 @@ existing databases), the same `max()` upsert, validation and summary fields, and
 - Proposed defaults: scan `~/Development` and `~/Prodigies`; author emails from those repos' git
   config; headline is lines added (not net).
 
-## Deployment steps
+## Deployment
 
-1. Generate the secret: `openssl rand -hex 32`. Store it in the Mac Keychain.
-2. In Dokploy, create a **Compose** service from the repo with path
-   `energy-proxy/docker-compose.yml`. Copy the env vars from the old HA-Proxy app and add
-   `BUILD_STATS_TOKEN`.
-3. Attach the domain to the `energy-proxy` service on port 3001. Check the `edge` routing still
-   works, and keep `ALLOWED_ORIGINS` correct.
-4. Once verified, remove the old HA-Proxy application and its manually created volume.
-5. Run the Mac job to backfill; check `GET /api/build-stats`.
+**Docker Compose migration is deferred.** For now HA-Proxy stays a Dockerfile application in
+Dokploy and build stats are enabled by setting `BUILD_STATS_TOKEN` on it.
 
-A hand-made `/data` volume was briefly added to the old HA-Proxy app in the Dokploy UI. It is
-superseded by the compose volume and can be deleted with the old app.
+**The `/data` volume is required and must not be lost.** It holds the SQLite file
+(`/data/build-stats.db`), which is the only durable record of lifetime totals (Claude Code logs are
+pruned after roughly 30 days). The volume is currently mounted on the existing HA-Proxy app,
+added by hand in the Dokploy UI (mount path `/data`, type volume). So:
+
+- Do not delete or recreate that volume, and do not delete the HA-Proxy app without moving it.
+- If the app is ever recreated or migrated, mount a persistent volume at `/data` first, and copy
+  the existing database across.
+- Losing it only loses history: the Mac job resends whatever is still in the logs, and the proxy
+  rebuilds from that, but older days would be gone.
+
+Steps to enable now:
+
+1. Generate the secret: `openssl rand -hex 32`, and store it in the Mac Keychain as
+   `build-stats-token`.
+2. Add `BUILD_STATS_TOKEN` (same value) to the HA-Proxy application's environment in Dokploy and
+   redeploy.
+3. Install the Mac job; it backfills on first run. Check `GET /api/build-stats`.
+
+When the Compose migration happens later, the plan is: create a Compose service from the repo with
+path `energy-proxy/docker-compose.yml` (its named volume `energy-proxy-data` is mounted at `/data`),
+copy the env vars from the old app, attach the domain on port 3001 (check the `edge` routing and
+`ALLOWED_ORIGINS`), move the existing database into the new volume, then remove the old app.
 
 ## Frontend (to do)
 
@@ -129,3 +144,14 @@ superseded by the compose volume and can be deleted with the old app.
 - Lines headline: added or net.
 - Include GitHub PRs merged (needs a GitHub token on the proxy), or take everything from the Mac?
 - Panel placement after the Home Lab redesign.
+
+## Status (28 Sep 2026): lines and Mac job built
+
+- Proxy: `linesAdded`, `linesRemoved`, `commits` per day (optional in a POST, default 0), with an
+  in-place migration for existing databases. `GET` now also returns `today`, `week` and `lifetime`
+  objects, each `{ written, cacheRead, linesAdded, linesRemoved, commits }`; the old flat fields
+  stay. Needs a redeploy.
+- Mac job: `scripts/build-stats/` (see its README). Decisions taken: written = output + cache
+  creation; scan `~/Development` and `~/Prodigies`; authors from repo git config plus
+  `edd.williams@me.com`; headline is lines added; single-file changes over 5,000 lines skipped as
+  data dumps. GitHub API skipped for now.
