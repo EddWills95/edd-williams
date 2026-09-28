@@ -1,7 +1,8 @@
 <script>
 	import EddHome from './edd-home.svelte';
 
-	const CVLink = 'https://www.dropbox.com/s/rqz79a5jducfnyy/Edd%20Williams%20-%20CV.pdf?dl=0';
+	const CVLink =
+		'https://www.dropbox.com/scl/fi/pt5echoorwr9sazn4c7f2/Edd-Williams-2026-CV-Google.pdf?rlkey=4hm3255ymj9eytpjuk14vs4t1&st=oqkzwobm&dl=0';
 
 	function handleOpenMenu() {
 		document.querySelector('#hidden-menu').classList.remove('translate-x-full');
