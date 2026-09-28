@@ -2,15 +2,26 @@
 	import { onMount } from 'svelte';
 
 	const STATS_URL = 'https://energy.edd-williams.com/api/energy-stats';
+	const BUILD_URL = 'https://energy.edd-williams.com/api/build-stats';
 	let stats = null;
+	let build = null;
+
+	// 5,780,295 -> "5.8M", 15,368 -> "15.4k", 34 -> "34"
+	function compact(n) {
+		if (n >= 1e9) return `${(n / 1e9).toFixed(1)}B`;
+		if (n >= 1e6) return `${(n / 1e6).toFixed(1)}M`;
+		if (n >= 1e4) return `${(n / 1e3).toFixed(1)}k`;
+		return n.toLocaleString('en-GB');
+	}
 
 	onMount(async () => {
-		try {
-			const res = await fetch(STATS_URL);
-			if (res.ok) stats = await res.json();
-		} catch {
-			stats = null;
-		}
+		const [energy, buildStats] = await Promise.allSettled([
+			fetch(STATS_URL).then((res) => (res.ok ? res.json() : null)),
+			fetch(BUILD_URL).then((res) => (res.ok ? res.json() : null))
+		]);
+		stats = energy.status === 'fulfilled' ? energy.value : null;
+		const t = buildStats.status === 'fulfilled' ? buildStats.value?.today : null;
+		if (t && [t.written, t.linesAdded, t.commits].every(Number.isInteger)) build = t;
 	});
 
 	function visitCode() {
@@ -57,21 +68,44 @@
 		</div>
 	</h1>
 
-	{#if stats}
-		<a
-			href="#home-lab"
-			class="fade-up mt-10 flex items-center gap-3 rounded-full border border-pale-cerulean/60 px-4 py-2 text-base hover:bg-bdazzled-blue-500/30 transition-colors"
-		>
-			<span class="relative flex h-2.5 w-2.5">
-				<span class="live-ping absolute inline-flex h-full w-full rounded-full bg-burnt-sienna-400"
-				></span>
-				<span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-burnt-sienna-400"></span>
-			</span>
-			<span
-				>Live from my flat: 🔋 {stats.batterySoc}% · ☀️ {stats.solarGenerationTodayKwh.toFixed(1)} kWh
-				today</span
-			>
-		</a>
+	{#if stats || build}
+		<div class="fade-up mt-10 flex flex-col items-center gap-3 px-4 text-center">
+			{#if stats}
+				<a
+					href="#home-lab"
+					class="flex items-center gap-3 rounded-full border border-pale-cerulean/60 px-4 py-2 text-base hover:bg-bdazzled-blue-500/30 transition-colors"
+				>
+					<span class="relative flex h-2.5 w-2.5 shrink-0">
+						<span
+							class="live-ping absolute inline-flex h-full w-full rounded-full bg-burnt-sienna-400"
+						></span>
+						<span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-burnt-sienna-400"></span>
+					</span>
+					<span
+						>Live from my flat: 🔋 {stats.batterySoc}% · ☀️ {stats.solarGenerationTodayKwh.toFixed(
+							1
+						)} kWh today</span
+					>
+				</a>
+			{/if}
+			{#if build}
+				<a
+					href="#home-lab"
+					class="flex items-center gap-3 rounded-2xl border border-pale-cerulean/60 px-4 py-2 text-base hover:bg-bdazzled-blue-500/30 transition-colors"
+				>
+					<span class="relative flex h-2.5 w-2.5 shrink-0">
+						<span
+							class="live-ping absolute inline-flex h-full w-full rounded-full bg-burnt-sienna-400"
+						></span>
+						<span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-burnt-sienna-400"></span>
+					</span>
+					<span
+						>Live from my laptop: ⌨️ {compact(build.written)} tokens · {compact(build.linesAdded)} lines
+						· {compact(build.commits)} commits today</span
+					>
+				</a>
+			{/if}
+		</div>
 	{/if}
 
 	<a
