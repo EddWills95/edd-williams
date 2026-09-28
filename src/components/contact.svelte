@@ -1,4 +1,7 @@
-<div class="p-4 mt-4 flex flex-col gap-4 justify-center items-center">
+<div class="p-4 mt-4 flex flex-col gap-4 justify-center items-center text-center">
+	<p class="text-pale-cerulean italic">
+		I'm not available for new work right now, but I'm always happy to say hi.
+	</p>
 	<p>
 		Send me an email at <a
 			class="underline text-bdazzled-blue-100"
@@ -7,6 +10,13 @@
 	</p>
 	<p>
 		Or find me on <a
+			class="underline text-bdazzled-blue-100"
+			href="https://www.linkedin.com/in/eddjwilliams"
+			target="_blank"
+			rel="noopener noreferrer">LinkedIn</a
+		>
+		or
+		<a
 			class="underline text-bdazzled-blue-100"
 			href="https://github.com/EddWills95"
 			target="_blank"
