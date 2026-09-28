@@ -1,7 +1,7 @@
 <script>
 	import { onMount, onDestroy } from 'svelte';
 
-	// The second sheet under the flat: what the person living in it has been building. Fetched on
+	// Its own section: what the person living in the flat has been building. Fetched on
 	// its own so a missing or failing build-stats endpoint never touches the energy drawing, and
 	// rendered only once real data exists (it 404s until the laptop's first push).
 	const BUILD_URL = 'https://energy.edd-williams.com/api/build-stats';
@@ -119,74 +119,87 @@
 	$: asOf = stats ? new Date(stats.asOf) : null;
 </script>
 
+<!-- The anchor is always present so links to #build exist at prerender time; the section only
+     appears once real data has loaded. -->
+<span class="anchor" id="build"></span>
 {#if stats}
-	<aside class="build-sheet" aria-labelledby="build-heading">
-		{#if mocked}
-			<p class="mock-flag">Mock data: dev fixture, not real numbers</p>
-		{/if}
+	<section class="base-section justify-start">
+		<h2 class="text-2xl mb-4">Build</h2>
 
-		<header class="build-head">
-			<div>
-				<h3 id="build-heading" class="build-title">Build</h3>
-				<p class="tagline">
-					The flat runs on the sun. The code runs on the sun, tea and a fair amount of AI.
+		<aside class="build-sheet" aria-labelledby="build-heading">
+			{#if mocked}
+				<p class="mock-flag">Mock data: dev fixture, not real numbers</p>
+			{/if}
+
+			<header class="build-head">
+				<div>
+					<h3 id="build-heading" class="build-title">Live from the laptop</h3>
+					<p class="tagline">
+						The flat runs on the sun. The code runs on the sun, tea and a fair amount of AI.
+					</p>
+				</div>
+				<p class="synced">
+					Synced <time class="nums" datetime={asOf.toISOString()}>{syncFormat.format(asOf)}</time>,
+					{ago(now - asOf.getTime())}
 				</p>
-			</div>
-			<p class="synced">
-				Synced <time class="nums" datetime={asOf.toISOString()}>{syncFormat.format(asOf)}</time>,
-				{ago(now - asOf.getTime())}
-			</p>
-		</header>
+			</header>
 
-		{#if stats.stale}
-			<p class="stale-note" role="status">
-				These haven't updated since {syncFormat.format(asOf)}, so they're frozen until the laptop
-				next checks in.
-			</p>
-		{/if}
-
-		<dl class="stats">
-			<div class="stat">
-				<dt class="label">Tokens written</dt>
-				<dd class="today nums">{count(stats.today.written)} <span class="unit">today</span></dd>
-				<dd class="lifetime nums">{big(stats.lifetime.written)} all time</dd>
-				<dd class="caption">{tokenCaption(stats.today.written)}</dd>
-			</div>
-
-			<div class="stat">
-				<dt class="label">Lines added</dt>
-				<dd class="today nums">{count(stats.today.linesAdded)} <span class="unit">today</span></dd>
-				<dd class="lifetime nums">{big(stats.lifetime.linesAdded)} all time</dd>
-				<dd class="caption">{linesCaption(stats.today)}</dd>
-			</div>
-
-			<div class="stat">
-				<dt class="label">Commits</dt>
-				<dd class="today nums">{count(stats.today.commits)} <span class="unit">today</span></dd>
-				<dd class="lifetime nums">{big(stats.lifetime.commits)} all time</dd>
-				<dd class="caption">{commitsCaption(stats.today)}</dd>
-			</div>
-		</dl>
-
-		<div class="notes">
-			<p class="week nums">
-				This week: {big(stats.week.written)} tokens written · {count(stats.week.linesAdded)} lines added,
-				{count(stats.week.linesRemoved)} removed · {count(stats.week.commits)}
-				{stats.week.commits === 1 ? 'commit' : 'commits'}.
-			</p>
-			{#if stats.lifetime.cacheRead > 0}
-				<p class="cache nums">
-					Also read from cache, all time: <strong>{count(stats.lifetime.cacheRead)}</strong> tokens.
-					{cacheCaption(stats.lifetime)}
+			{#if stats.stale}
+				<p class="stale-note" role="status">
+					These haven't updated since {syncFormat.format(asOf)}, so they're frozen until the laptop
+					next checks in.
 				</p>
 			{/if}
-			<p class="footnote">
-				Tokens come from my Claude Code usage; lines and commits from git. Word counts assume about
-				{WORDS_PER_TOKEN} words per token, a novel at {count(NOVEL_WORDS)} words and The Lord of the Rings
-				at about {count(LOTR_WORDS)}.
-			</p>
-		</div>
-	</aside>
+
+			<dl class="stats">
+				<div class="stat">
+					<dt class="label">Tokens written</dt>
+					<dd class="today nums">{count(stats.today.written)} <span class="unit">today</span></dd>
+					<dd class="lifetime nums">{big(stats.lifetime.written)} all time</dd>
+					<dd class="caption">{tokenCaption(stats.today.written)}</dd>
+				</div>
+
+				<div class="stat">
+					<dt class="label">Lines added</dt>
+					<dd class="today nums">
+						{count(stats.today.linesAdded)} <span class="unit">today</span>
+					</dd>
+					<dd class="lifetime nums">{big(stats.lifetime.linesAdded)} all time</dd>
+					<dd class="caption">{linesCaption(stats.today)}</dd>
+				</div>
+
+				<div class="stat">
+					<dt class="label">Commits</dt>
+					<dd class="today nums">{count(stats.today.commits)} <span class="unit">today</span></dd>
+					<dd class="lifetime nums">{big(stats.lifetime.commits)} all time</dd>
+					<dd class="caption">{commitsCaption(stats.today)}</dd>
+				</div>
+			</dl>
+
+			<div class="notes">
+				<p class="week nums">
+					This week: {big(stats.week.written)} tokens written · {count(stats.week.linesAdded)} lines added,
+					{count(stats.week.linesRemoved)} removed · {count(stats.week.commits)}
+					{stats.week.commits === 1 ? 'commit' : 'commits'}.
+				</p>
+				{#if stats.lifetime.cacheRead > 0}
+					<p class="cache nums">
+						Also read from cache, all time: <strong>{count(stats.lifetime.cacheRead)}</strong>
+						tokens.
+						{cacheCaption(stats.lifetime)}
+					</p>
+				{/if}
+				<p class="footnote">
+					Tokens come from my Claude Code usage; lines and commits from git. Word counts assume
+					about
+					{WORDS_PER_TOKEN} words per token, a novel at {count(NOVEL_WORDS)} words and The Lord of the
+					Rings at about {count(LOTR_WORDS)}.
+				</p>
+			</div>
+		</aside>
+	</section>
+
+	<hr class="section-break" />
 {/if}
 
 <style>

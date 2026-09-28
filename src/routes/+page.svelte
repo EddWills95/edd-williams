@@ -6,6 +6,7 @@
 	import Header from '../components/header.svelte';
 	import Contact from '../components/contact.svelte';
 	import HomeLab from '../components/home-lab.svelte';
+	import BuildStats from '../components/build-stats.svelte';
 </script>
 
 <!-- This might not need to be main -->
@@ -35,6 +36,8 @@
 		</section>
 
 		<hr class="section-break" />
+
+		<BuildStats />
 
 		<HomeLab />
 

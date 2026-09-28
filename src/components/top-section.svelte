@@ -90,7 +90,7 @@
 			{/if}
 			{#if build}
 				<a
-					href="#home-lab"
+					href="#build"
 					class="flex items-center gap-3 rounded-2xl border border-pale-cerulean/60 px-4 py-2 text-base hover:bg-bdazzled-blue-500/30 transition-colors"
 				>
 					<span class="relative flex h-2.5 w-2.5 shrink-0">
