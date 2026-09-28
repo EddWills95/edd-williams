@@ -1,0 +1,27 @@
+# Deployed by Dokploy as a Compose service. Environment values are set in Dokploy's
+# Environment tab and interpolated below, so this file is the single place that shows what the
+# service needs, including the volume that holds the build-stats SQLite database.
+services:
+  energy-proxy:
+    build: .
+    restart: unless-stopped
+    environment:
+      HA_URL: ${HA_URL}
+      HA_TOKEN: ${HA_TOKEN}
+      PORT: 3001
+      CACHE_TTL_SECONDS: ${CACHE_TTL_SECONDS:-600}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://edd-williams.com}
+      HA_ENTITY_SOLAR_POWER: ${HA_ENTITY_SOLAR_POWER:-}
+      HA_ENTITY_HOUSE_POWER: ${HA_ENTITY_HOUSE_POWER:-}
+      HA_ENTITY_GRID_POWER: ${HA_ENTITY_GRID_POWER:-}
+      HA_ENTITY_SAVINGS_TODAY: ${HA_ENTITY_SAVINGS_TODAY:-}
+      HA_GRID_POWER_SIGN: ${HA_GRID_POWER_SIGN:-}
+      BUILD_STATS_TOKEN: ${BUILD_STATS_TOKEN:-}
+      BUILD_STATS_DB: /data/build-stats.db
+    volumes:
+      - energy-proxy-data:/data
+    expose:
+      - '3001'
+
+volumes:
+  energy-proxy-data:

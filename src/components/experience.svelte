@@ -10,6 +10,7 @@
 			link: { text: 'inventing-mostly.com', url: 'https://inventing-mostly.com' },
 			client: {
 				name: 'Prodigies',
+				image: './prodigies.png',
 				url: 'https://prodigiesofficial.com',
 				description:
 					'A creative talent platform connecting designers, photographers, illustrators and other creatives with brands and agencies through profiles, portfolios, messaging and paid project briefs.',
@@ -204,17 +205,28 @@
 					{/if}
 					{#if option.client}
 						<section class="flex flex-col gap-4 rounded border-2 border-pale-cerulean/30 p-4">
-							<div>
-								<h4 class="text-sm uppercase tracking-widest text-burnt-sienna-400">Client</h4>
-								<h5 class="text-2xl">
-									<a
-										class="hover:text-burnt-sienna-400 transition-colors"
-										href={option.client.url}
-										target="_blank"
-										rel="noopener noreferrer">{option.client.name}</a
-									>
-								</h5>
-								<p class="text-base text-pale-cerulean">{option.client.description}</p>
+							<div class="flex items-start gap-4">
+								{#if option.client.image}
+									<img
+										class="h-16 w-16 shrink-0 rounded-sm"
+										style="image-rendering: pixelated"
+										src={option.client.image}
+										alt="{option.client.name} logo"
+										loading="lazy"
+									/>
+								{/if}
+								<div>
+									<h4 class="text-sm uppercase tracking-widest text-burnt-sienna-400">Client</h4>
+									<h5 class="text-2xl">
+										<a
+											class="hover:text-burnt-sienna-400 transition-colors"
+											href={option.client.url}
+											target="_blank"
+											rel="noopener noreferrer">{option.client.name}</a
+										>
+									</h5>
+									<p class="text-base text-pale-cerulean">{option.client.description}</p>
+								</div>
 							</div>
 							<ul class="flex flex-col gap-2">
 								{#each option.client.highlights as highlight}
