@@ -119,7 +119,7 @@
 <section class="base-section justify-start" aria-labelledby="home-lab-heading">
 	<h2 id="home-lab-heading" class="text-2xl mb-4">Home Lab</h2>
 
-	<p class="p-4 mt-4 text-light-cyan text-base max-w-[65ch]">
+	<p class="p-4 mt-4 text-light-cyan text-base">
 		Alongside the day job, I run a small home lab — solar, battery storage, and a pile of
 		self-hosted services. This is my flat, drawn from the same Home Assistant setup that runs it:
 		the lines move when power does.

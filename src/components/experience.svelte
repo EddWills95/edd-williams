@@ -5,6 +5,7 @@
 	const options = [
 		{
 			id: 'self-employed',
+			dates: '2026 – Present',
 			buttonText: 'Self Employed',
 			image: '',
 			imageAlt: '',
@@ -25,8 +26,23 @@
 			}
 		},
 		{
+			id: 'wise',
+			dates: '2026',
+			buttonText: 'Wise',
+			image: '',
+			imageAlt: '',
+			title: 'Wise',
+			tagline: 'Senior Frontend Engineer',
+			highlights: [
+				'Short three-month stint on a Node and React team',
+				'Scaffolded the foundations of a new investment product',
+				'Moved on to build more independently'
+			],
+			tech: ['React', 'Node.js']
+		},
+		{
 			id: 'runna',
-			dates: '2025 – Present',
+			dates: '2025 – 2026',
 			buttonText: 'Runna',
 			image: './runna.webp',
 			imageAlt: 'runna logo',
