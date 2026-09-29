@@ -7,6 +7,7 @@
 			text: 'A self-hosted bitcoin node with an app store for self-sovereignty apps. Contributed to the UI, fixing bugs and adding features. Started a project to integrate a screen. ',
 			image: './umbrel.webp',
 			imageAlt: 'get umbrel',
+			imageSize: 225,
 			github: 'https://github.com/getumbrel/umbrel-dashboard/pulls?q=is%3Apr+author%3AEddWills95+',
 			url: 'https://getumbrel.com/'
 		}
@@ -59,6 +60,8 @@
 							class="rounded-sm object-cover w-auto h-16 sm:h-20"
 							src={project.image}
 							alt={project.imageAlt ?? ''}
+							width={project.imageSize}
+							height={project.imageSize}
 							loading="lazy"
 						/>
 					</div>

@@ -21,6 +21,7 @@ RUN yarn build
 FROM nginx:1.25-alpine
 
 # Copy the build output to Nginx's html directory
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/build /usr/share/nginx/html
 
 # Expose the port the app runs on

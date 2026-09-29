@@ -71,7 +71,7 @@
 				</ul>
 			</div>
 			<div class="w-auto h-48 offset-border">
-				<img class="z-10 w-48 h-48 rounded" src="./edd.webp" alt="Edd" />
+				<img class="z-10 w-48 h-48 rounded" src="./edd.webp" alt="Edd" width="192" height="192" />
 			</div>
 		</div>
 	</article>
