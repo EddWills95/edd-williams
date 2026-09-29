@@ -56,6 +56,7 @@
 	$: hasHouse = isNum(stats?.housePowerW);
 	$: hasGrid = isNum(stats?.gridPowerW);
 	$: hasSavingsToday = isNum(stats?.batterySavingsToday);
+	$: hasTea = isNum(stats?.kettleCupsToday);
 	$: batteryMoving =
 		isNum(stats?.batteryPowerW) &&
 		Math.abs(stats.batteryPowerW) > 0 &&
@@ -183,7 +184,7 @@
 			{/if}
 		</div>
 
-		<figcaption class="title-block">
+		<figcaption class="title-block" class:has-tea={hasTea && status === 'ready'}>
 			{#if status === 'loading'}
 				<p class="state-note col-span-full">Checking in with the flat…</p>
 			{:else if status === 'error'}
@@ -217,6 +218,16 @@
 					<span class="label">Solar, all time</span>
 					<span class="mid nums">{kwh(stats.solarGenerationTotalKwh, 0)} kWh</span>
 				</div>
+
+				{#if hasTea}
+					<div class="cell cell-tea">
+						<span class="label">Tea, today</span>
+						<span class="mid nums"
+							>{stats.kettleCupsToday} {stats.kettleCupsToday === 1 ? 'cup' : 'cups'}</span
+						>
+						<span class="detail">estimated from the kettle</span>
+					</div>
+				{/if}
 
 				<div class="cell">
 					<span class="label">Last reading</span>
@@ -379,7 +390,8 @@
 	}
 
 	.cell-feature,
-	.cell-wide {
+	.cell-wide,
+	.cell-tea {
 		grid-column: span 2 / span 2;
 	}
 
@@ -397,8 +409,13 @@
 			border-left: 1px solid rgba(152, 193, 217, 0.3);
 		}
 
+		.has-tea {
+			grid-template-columns: repeat(5, minmax(0, 1fr));
+		}
+
 		.cell-feature,
-		.cell-wide {
+		.cell-wide,
+		.cell-tea {
 			grid-column: auto;
 		}
 

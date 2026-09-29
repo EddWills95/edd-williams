@@ -83,5 +83,13 @@ export function mapStats(required, optional = {}, options = {}) {
 	const batterySavingsToday = readPounds(optional.batterySavingsToday);
 	if (batterySavingsToday !== null) stats.batterySavingsToday = batterySavingsToday;
 
+	// Kettle: cups is an estimate (kettle energy today / kWh per cup), boils is a count of
+	// power spikes. Both are whole numbers, never negative.
+	const kettleCupsToday = readNumber(optional.kettleCupsToday);
+	if (kettleCupsToday !== null) stats.kettleCupsToday = Math.max(0, Math.round(kettleCupsToday));
+
+	const kettleBoilsToday = readNumber(optional.kettleBoilsToday);
+	if (kettleBoilsToday !== null) stats.kettleBoilsToday = Math.max(0, Math.round(kettleBoilsToday));
+
 	return stats;
 }

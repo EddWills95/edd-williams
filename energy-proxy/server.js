@@ -64,12 +64,21 @@ const OPTIONAL_ENTITY_ENV = {
 	solarPowerW: 'HA_ENTITY_SOLAR_POWER',
 	housePowerW: 'HA_ENTITY_HOUSE_POWER',
 	gridPowerW: 'HA_ENTITY_GRID_POWER',
-	batterySavingsToday: 'HA_ENTITY_SAVINGS_TODAY'
+	batterySavingsToday: 'HA_ENTITY_SAVINGS_TODAY',
+	kettleCupsToday: 'HA_ENTITY_KETTLE_CUPS',
+	kettleBoilsToday: 'HA_ENTITY_KETTLE_BOILS'
+};
+
+// The kettle helpers are created by hand in Home Assistant with fixed ids, so they default on
+// (the env var still overrides them). A missing entity is just omitted, like any other optional.
+const OPTIONAL_ENTITY_DEFAULTS = {
+	kettleCupsToday: 'sensor.kettle_cups_today',
+	kettleBoilsToday: 'sensor.kitchen_kettle_plug_kettle_boils_today'
 };
 
 const OPTIONAL_ENTITIES = Object.fromEntries(
 	Object.entries(OPTIONAL_ENTITY_ENV)
-		.map(([key, envVar]) => [key, trim(process.env[envVar])])
+		.map(([key, envVar]) => [key, trim(process.env[envVar]) || OPTIONAL_ENTITY_DEFAULTS[key]])
 		.filter(([, entityId]) => entityId)
 );
 

@@ -28,7 +28,9 @@ const variants = {
 		solarPowerW: 0,
 		housePowerW: 452,
 		gridPowerW: 51,
-		batterySavingsToday: 0.84
+		batterySavingsToday: 0.84,
+		kettleCupsToday: 6,
+		kettleBoilsToday: 3
 	}),
 	sunny: () => ({
 		...legacy(),
@@ -39,7 +41,9 @@ const variants = {
 		solarPowerW: 2140,
 		housePowerW: 390,
 		gridPowerW: -570,
-		batterySavingsToday: 0.31
+		batterySavingsToday: 0.31,
+		kettleCupsToday: 1,
+		kettleBoilsToday: 1
 	}),
 	legacy,
 	stale: () => ({ ...legacy(), asOf: minutesAgo(190), stale: true })
