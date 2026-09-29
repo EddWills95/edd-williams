@@ -1,48 +1,22 @@
 <script>
 	import { onMount, onDestroy } from 'svelte';
 	import FlatDrawing from './home-lab-flat.svelte';
+	import { energyStats } from '$lib/live-stats.js';
 
-	const STATS_URL = 'https://energy.edd-williams.com/api/energy-stats';
-	// The proxy caches for 10 minutes; well past that, the flat has stopped checking in.
-	const STALE_AFTER_MS = 30 * 60_000;
+	// The proxy caches for a minute and we poll every ~75s; well past that, the flat has stopped
+	// checking in.
+	const STALE_AFTER_MS = 5 * 60_000;
 
-	let status = 'loading'; // 'loading' | 'ready' | 'error'
-	let stats = null;
-	let mocked = false;
 	let now = Date.now();
 	let clock;
 
-	// DEV-ONLY: `?mock=<variant>` swaps the live endpoint for local fixtures (CORS blocks
-	// localhost from the real one). The whole branch is compiled out of production builds.
-	async function loadMock() {
-		if (!import.meta.env.DEV) return null;
-		const variant = new URLSearchParams(window.location.search).get('mock');
-		if (!variant) return null;
-		mocked = true;
-		const { mockStats } = await import('./home-lab-fixtures.js');
-		return mockStats(variant);
-	}
-
-	async function load() {
-		status = 'loading';
-		try {
-			let data = await loadMock();
-			if (!data) {
-				const res = await fetch(STATS_URL);
-				if (!res.ok) throw new Error(`energy-proxy returned ${res.status}`);
-				data = await res.json();
-			}
-			stats = data;
-			now = Date.now();
-			status = 'ready';
-		} catch (err) {
-			console.error('Failed to load home lab stats:', err);
-			status = 'error';
-		}
-	}
+	$: status = $energyStats.status;
+	$: stats = $energyStats.data;
+	$: mocked = $energyStats.mocked;
+	// Each fresh reading resets "now" so the freshness maths never lags the data.
+	$: if (stats) now = Date.now();
 
 	onMount(() => {
-		load();
 		clock = setInterval(() => (now = Date.now()), 30_000);
 	});
 
@@ -218,7 +192,9 @@
 						Couldn't reach the live stats right now — the home lab might be offline, or having a
 						nap.
 					</p>
-					<button type="button" class="retry" on:click={load}>Try again</button>
+					<button type="button" class="retry" on:click={() => energyStats.refresh()}
+						>Try again</button
+					>
 				</div>
 			{:else}
 				{#if stale}

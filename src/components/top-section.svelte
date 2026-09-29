@@ -1,10 +1,12 @@
 <script>
-	import { onMount } from 'svelte';
+	import { energyStats, buildStats } from '$lib/live-stats.js';
 
-	const STATS_URL = 'https://energy.edd-williams.com/api/energy-stats';
-	const BUILD_URL = 'https://energy.edd-williams.com/api/build-stats';
-	let stats = null;
-	let build = null;
+	$: stats = $energyStats.data;
+	$: today = $buildStats.data?.today;
+	$: build =
+		today && [today.written, today.linesAdded, today.commits].every(Number.isInteger)
+			? today
+			: null;
 
 	// 5,780,295 -> "5.8M", 15,368 -> "15.4k", 34 -> "34"
 	function compact(n) {
@@ -13,16 +15,6 @@
 		if (n >= 1e4) return `${(n / 1e3).toFixed(1)}k`;
 		return n.toLocaleString('en-GB');
 	}
-
-	onMount(async () => {
-		const [energy, buildStats] = await Promise.allSettled([
-			fetch(STATS_URL).then((res) => (res.ok ? res.json() : null)),
-			fetch(BUILD_URL).then((res) => (res.ok ? res.json() : null))
-		]);
-		stats = energy.status === 'fulfilled' ? energy.value : null;
-		const t = buildStats.status === 'fulfilled' ? buildStats.value?.today : null;
-		if (t && [t.written, t.linesAdded, t.commits].every(Number.isInteger)) build = t;
-	});
 
 	function visitCode() {
 		window.open('https://github.com/EddWills95/edd-williams', '_blank');

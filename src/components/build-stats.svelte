@@ -1,32 +1,18 @@
 <script>
 	import { onMount, onDestroy } from 'svelte';
+	import { buildStats } from '$lib/live-stats.js';
 
-	// Its own section: what the person living in the flat has been building. Fetched on
-	// its own so a missing or failing build-stats endpoint never touches the energy drawing, and
+	// Its own section: what the person living in the flat has been building. Uses its own
+	// endpoint so a missing or failing build-stats response never touches the energy drawing, and
 	// rendered only once real data exists (it 404s until the laptop's first push).
-	const BUILD_URL = 'https://energy.edd-williams.com/api/build-stats';
 
 	// Stated in the footnote, so every comparison below is checkable.
 	const WORDS_PER_TOKEN = 0.75;
 	const NOVEL_WORDS = 90_000;
 	const LOTR_WORDS = 480_000;
 
-	let stats = null;
-	let mocked = false;
 	let now = Date.now();
 	let clock;
-
-	// DEV-ONLY: `?mockbuild=<variant>` (or any `?mock=`) swaps in local fixtures. Compiled out of
-	// production builds.
-	async function loadMock() {
-		if (!import.meta.env.DEV) return null;
-		const params = new URLSearchParams(window.location.search);
-		const variant = params.get('mockbuild') ?? (params.has('mock') ? 'normal' : null);
-		if (!variant) return null;
-		mocked = true;
-		const { mockBuildStats } = await import('./home-lab-fixtures.js');
-		return mockBuildStats(variant);
-	}
 
 	const FIELDS = ['written', 'cacheRead', 'linesAdded', 'linesRemoved', 'commits'];
 	const isCount = (value) => Number.isInteger(value) && value >= 0;
@@ -39,23 +25,13 @@
 		return !Number.isNaN(new Date(data.asOf).getTime());
 	}
 
-	onMount(async () => {
+	// Bad payloads are treated like no data: the panel simply doesn't appear.
+	$: mocked = $buildStats.mocked;
+	$: stats = valid($buildStats.data) ? $buildStats.data : null;
+	$: if (stats) now = Date.now();
+
+	onMount(() => {
 		clock = setInterval(() => (now = Date.now()), 30_000);
-		try {
-			let data = await loadMock();
-			if (!data) {
-				const res = await fetch(BUILD_URL);
-				// 404 until the first push: not an error worth showing anyone, just nothing to show.
-				if (!res.ok) return;
-				data = await res.json();
-			}
-			if (valid(data)) {
-				stats = data;
-				now = Date.now();
-			}
-		} catch {
-			// Network failure or bad JSON: same as no data. The panel simply doesn't appear.
-		}
 	});
 
 	onDestroy(() => clearInterval(clock));
