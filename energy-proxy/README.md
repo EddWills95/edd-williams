@@ -67,7 +67,7 @@ other self-hosted services), built from this `energy-proxy/` subdirectory via th
 
 ## Design notes
 
-- Responses are cached in memory for `CACHE_TTL_SECONDS` (default 10 minutes) so a burst of
+- Responses are cached in memory for `CACHE_TTL_SECONDS` (default 60 seconds; the site polls about every 75s) so a burst of
   site traffic doesn't turn into a burst of Home Assistant API calls.
 - If a Home Assistant fetch fails but a previous successful result is cached, the stale cached
   value is served (with `"stale": true`) rather than the endpoint going down — a public site

@@ -10,7 +10,7 @@ const trim = (v) => v?.trim();
 const HA_URL = trim(process.env.HA_URL);
 const HA_TOKEN = trim(process.env.HA_TOKEN);
 const PORT = trim(process.env.PORT) || 3001;
-const CACHE_TTL_SECONDS = trim(process.env.CACHE_TTL_SECONDS) || '600';
+const CACHE_TTL_SECONDS = trim(process.env.CACHE_TTL_SECONDS) || '60';
 const ALLOWED_ORIGINS = trim(process.env.ALLOWED_ORIGINS) || 'http://localhost:3000';
 const BUILD_STATS_TOKEN = trim(process.env.BUILD_STATS_TOKEN);
 const BUILD_STATS_DB = trim(process.env.BUILD_STATS_DB) || '/data/build-stats.db';
@@ -146,7 +146,7 @@ app.get('/healthz', (_req, res) => {
 app.get('/api/energy-stats', async (_req, res) => {
 	try {
 		const stats = await getStats();
-		res.set('Cache-Control', `public, max-age=${CACHE_TTL_SECONDS}`);
+		res.set('Cache-Control', `public, max-age=${CACHE_TTL_SECONDS}, stale-while-revalidate=30`);
 		res.json(stats);
 	} catch (err) {
 		console.error('Failed to fetch energy stats:', err.message);
@@ -157,7 +157,7 @@ app.get('/api/energy-stats', async (_req, res) => {
 app.get('/api/build-stats', (_req, res) => {
 	const summary = buildStats?.summary();
 	if (!summary) return res.status(404).json({ error: 'No build stats yet' });
-	res.set('Cache-Control', 'public, max-age=300');
+	res.set('Cache-Control', 'public, max-age=120, stale-while-revalidate=60');
 	res.json(summary);
 });
 
