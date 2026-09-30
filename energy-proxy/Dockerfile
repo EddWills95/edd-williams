@@ -5,7 +5,7 @@ WORKDIR /app
 COPY package.json yarn.lock* ./
 RUN yarn install --production
 
-COPY server.js map-stats.js build-stats.js ./
+COPY server.js map-stats.js map-history.js build-stats.js ./
 
 EXPOSE 3001
 
