@@ -80,6 +80,36 @@ other self-hosted services), built from this `energy-proxy/` subdirectory via th
   intentionally has no secrets in its response, so the main risk it guards against is other
   sites embedding/scraping it, not data exposure.
 
+## Energy history
+
+`GET /api/energy-history` returns the last 24 hours as 15-minute buckets (time-weighted averages,
+`null` where a sensor had no reading), for the site's day-in-the-life strip. It reads only the
+sensors already published above: battery charge and battery power, plus solar, house and grid
+power when their `HA_ENTITY_*` variables are set (each series is omitted when its entity isn't
+configured).
+
+`batteryW` is signed: positive while discharging, negative while charging. The battery power
+sensor only reports a magnitude, so the direction comes from the battery action sensor; while the
+action is `HOLD` it falls back to the power balance (house − solar − grid), and is `null` for that
+bucket if any of those three is missing.
+
+```json
+{
+	"start": "2026-09-29T20:15:00.000Z",
+	"intervalMinutes": 15,
+	"batterySoc": [46.8, 46.1],
+	"solarW": [0, 0],
+	"houseW": [452, 431],
+	"gridW": [51, 40],
+	"batteryW": [401, 388],
+	"asOf": "2026-09-30T20:12:00.000Z"
+}
+```
+
+Each array has 96 entries. `gridW` follows the same sign convention as `/api/energy-stats`.
+The response is cached for five minutes, and the last good copy is served if Home Assistant
+can't be reached. The bucketing lives in `map-history.js` and is tested by `map-history.test.js`.
+
 ## Build stats
 
 `POST /api/build-stats` (bearer `BUILD_STATS_TOKEN`) accepts per-day totals pushed from the Mac by

@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { mapStats } from './map-stats.js';
+import { mapHistory } from './map-history.js';
 import { openBuildStats, tokenMatches, validateSnapshot } from './build-stats.js';
 
 // PaaS env-var UIs routinely round-trip pasted values with a trailing newline or stray
@@ -131,6 +132,59 @@ async function getStats() {
 	}
 }
 
+// The last 24 hours as 15-minute buckets, for the site's "day in the life" strip. Only the
+// sensors already published live (solar, house, grid, battery charge) are read, and the
+// response is cached for five minutes since a day's shape barely changes between requests.
+const HISTORY_TTL_MS = 5 * 60_000;
+let historyCache = null; // { data, fetchedAt }
+
+async function fetchHistory() {
+	const end = new Date();
+	const start = new Date(end.getTime() - 25 * 3_600_000); // a little early, so a value set before the window carries in
+	const roles = {
+		soc: ENTITIES.batterySoc,
+		batteryPower: ENTITIES.batteryPowerW,
+		batteryAction: ENTITIES.batteryAction,
+		solar: OPTIONAL_ENTITIES.solarPowerW,
+		house: OPTIONAL_ENTITIES.housePowerW,
+		grid: OPTIONAL_ENTITIES.gridPowerW
+	};
+	const wanted = Object.entries(roles).filter(([, id]) => id);
+	const url =
+		`${HA_URL}/api/history/period/${start.toISOString()}` +
+		`?filter_entity_id=${wanted.map(([, id]) => id).join(',')}` +
+		`&end_time=${end.toISOString()}&minimal_response`;
+	const res = await fetch(url, { headers: { Authorization: `Bearer ${HA_TOKEN}` } });
+	if (!res.ok) throw new Error(`Home Assistant returned ${res.status} for history`);
+	const groups = await res.json();
+
+	// One array per entity, in no guaranteed order; match them back by entity_id.
+	const history = {};
+	for (const changes of groups) {
+		const id = changes[0]?.entity_id;
+		const role = wanted.find(([, entityId]) => entityId === id)?.[0];
+		if (role) history[role] = changes;
+	}
+	history.soc ??= [];
+	return mapHistory(history, { now: end, gridExportIsPositive: GRID_EXPORT_IS_POSITIVE });
+}
+
+async function getHistory() {
+	const now = Date.now();
+	if (historyCache && now - historyCache.fetchedAt < HISTORY_TTL_MS) return historyCache.data;
+	try {
+		const data = await fetchHistory();
+		historyCache = { data, fetchedAt: now };
+		return data;
+	} catch (err) {
+		if (historyCache) {
+			console.error('History fetch failed, serving stale cache:', err.message);
+			return historyCache.data;
+		}
+		throw err;
+	}
+}
+
 // Build stats are optional: if the token isn't set or the database can't be opened, the
 // energy endpoint carries on and only the build routes report unavailable.
 let buildStats = null;
@@ -160,6 +214,17 @@ app.get('/api/energy-stats', async (_req, res) => {
 	} catch (err) {
 		console.error('Failed to fetch energy stats:', err.message);
 		res.status(502).json({ error: 'Failed to fetch energy stats' });
+	}
+});
+
+app.get('/api/energy-history', async (_req, res) => {
+	try {
+		const history = await getHistory();
+		res.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=120');
+		res.json(history);
+	} catch (err) {
+		console.error('Failed to fetch energy history:', err.message);
+		res.status(502).json({ error: 'Failed to fetch energy history' });
 	}
 });
 
