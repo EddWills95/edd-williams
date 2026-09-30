@@ -22,24 +22,24 @@ Edd is a hands-on builder, not just a software engineer who ships CRUD apps. The
 
 - Statically built SvelteKit site (`adapter-static`), served via Nginx in Docker; built from the `Dockerfile` and deployed by Dokploy (no GitHub Actions workflow remains).
 - Edd runs a home lab (TrueNAS, Dokploy + Traefik, Home Assistant) that is a real source of content/evidence for this site, not just infrastructure metaphor.
-- A small proxy service (planned, to be hosted under the `edd-williams` project in Dokploy) will hold a restricted Home Assistant token server-side and expose a minimal public endpoint for live energy/battery stats — the site must never talk to Home Assistant directly or embed HA credentials client-side.
+- A small proxy service (`energy-proxy/`, hosted under the `edd-williams` project in Dokploy) is live. It holds a restricted Home Assistant token server-side and exposes minimal public endpoints for live energy/battery stats (with a 60s stale-while-revalidate cache), an estimated "cups of tea" count derived from kettle power spikes, and build stats (Claude token/line/commit counts pushed from Edd's Mac). The site polls it through a shared, visibility-aware poller and must never talk to Home Assistant directly or embed HA credentials client-side.
 
 ## Capabilities and Constraints
 
-- No backend today beyond the planned energy-stats proxy; everything else is static HTML/CSS/JS.
+- No backend beyond the energy/build-stats proxy; everything else is static HTML/CSS/JS.
 - Content (CV/experience entries, project descriptions) must reflect Edd's real history — never fabricate roles, metrics, or projects.
 - Live/near-live data (once the proxy exists) must come from real sensors, not mocked or invented numbers, though values may be rounded/obscured if Edd prefers not to show exact figures.
 
 ## Brand Commitments
 
 - Name: Edd Williams. GitHub: EddWills95. Secondary project site: inventing-mostly.com (where more of his projects actually live).
-- Incumbent visual system (not necessarily binding — actively under redesign as of this session): dark navy/"gunmetal" background, burnt-sienna accent, Raleway typeface, a recurring `—E—` section-divider motif, and an "offset-border" drop-shadow card treatment used across photos/projects.
+- Incumbent look retained (gunmetal/burnt-sienna, self-hosted Raleway, Solar blueprint-style diagram); visual detail lives in DESIGN.md, not yet written.
 
 ## Evidence on Hand
 
-- Real CV/experience history: Runna (Senior SWE, Growth squad, 2025–present), OakNorth Business Banking (Mid→Senior SWE, 2023–2025), LimeJump (Full Stack Engineer, 2022–2023), OVO Energy (Full Stack Engineer, 2022–2023), Intuit/QuickBooks Payroll UK (Junior→Mid Engineer, 2018–2020), plus earlier University of Hertfordshire and We Got Coders entries.
-- Real side projects: Umbrel (Bitcoin/Lightning RaspberryPi node, contributed UI/bugfixes), EPSolar Dashboard (RaspberryPi solar charge controller dashboard), RaspberryPi Thermostat (first hardware/software project).
-- Real live home-energy sensors available via Home Assistant (confirmed this session): lifetime battery-system savings (~£60.25, ticking upward), lifetime solar generation (~211 kWh), today's solar/battery savings, battery state of charge (%) and charge/discharge power (W).
+- Real CV/experience history: Self Employed as Inventing Mostly (2026–present, including a Prodigies platform rebuild from Directus to Supabase on Next.js/React), Wise (Senior Frontend Engineer, 2026), Runna (Senior SWE, Growth squad, 2025–2026), OakNorth Business Banking (Mid→Senior SWE, 2023–2025), LimeJump (Full Stack Engineer, 2022–2023), OVO Energy (Full Stack Engineer, 2022–2023), Intuit/QuickBooks Payroll UK (Junior→Mid Engineer, 2018–2020), plus earlier University of Hertfordshire and We Got Coders entries.
+- Real side projects: Umbrel (Bitcoin/Lightning RaspberryPi node, contributed UI/bugfixes), plus projects curated under inventing-mostly.com: Stash (wardrobe app, coming soon), onvif-protect-bridge (ONVIF cameras into UniFi Protect), Backcast (solar/battery simulation, in progress). Earlier hardware work: EPSolar Dashboard, RaspberryPi Thermostat.
+- Real live home-energy sensors available via Home Assistant, now surfaced on the site: lifetime battery-system savings (~£60.25, ticking upward), lifetime solar generation (~211 kWh), today's solar/battery savings, battery state of charge (%) and charge/discharge power (W).
 - No testimonials, case studies, press, or third-party proof exist — do not invent any.
 
 ## Product Principles

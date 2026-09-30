@@ -34,4 +34,4 @@ Prettier config (`.prettierrc`): tabs, single quotes, no trailing commas, 100 pr
 
 ## Deployment
 
-There is no CI workflow in this repo (the Docker Hub push workflow was removed). The `Dockerfile` (Node build stage → static files served by Nginx) is built and deployed by Dokploy; trigger a deploy there after pushing to `main`.
+There is no CI workflow in this repo (the Docker Hub push workflow was removed). The `Dockerfile` (Node build stage → static files served by Nginx) is built and deployed by Dokploy automatically on every push to `main` — no manual trigger needed.
