@@ -49,7 +49,7 @@ Settings (environment variables, all optional):
 | `BUILD_STATS_ROOTS`      | `~/Development:~/Prodigies` (colon-separated)     |
 | `BUILD_STATS_EMAILS`     | extra author emails, comma-separated              |
 | `BUILD_STATS_TZ`         | `Europe/London`                                   |
-| `BUILD_STATS_CLAUDE_DIR` | `~/.claude/projects`                              |
+| `BUILD_STATS_CLAUDE_DIR` | `~/.claude/projects:~/.claude-prodigies/projects` (colon-separated) |
 | `BUILD_STATS_TOKEN`      | overrides the Keychain, for local testing only    |
 
 ## The token

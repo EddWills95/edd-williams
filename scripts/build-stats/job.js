@@ -27,7 +27,14 @@ const env = (name) => process.env[name]?.trim() || undefined;
 const CONFIG = {
 	url: env('BUILD_STATS_URL') ?? 'https://energy.edd-williams.com/api/build-stats',
 	timeZone: env('BUILD_STATS_TZ') ?? 'Europe/London',
-	logsDir: env('BUILD_STATS_CLAUDE_DIR') ?? join(HOME, '.claude', 'projects'),
+	// The claude-prodigies alias sets CLAUDE_CONFIG_DIR=~/.claude-prodigies, so its sessions are
+	// logged separately. Overlap between directories is harmless: tokens are de-duplicated.
+	logsDirs: (
+		env('BUILD_STATS_CLAUDE_DIR') ??
+		`${join(HOME, '.claude', 'projects')}:${join(HOME, '.claude-prodigies', 'projects')}`
+	)
+		.split(':')
+		.filter(Boolean),
 	roots: (env('BUILD_STATS_ROOTS') ?? `${join(HOME, 'Development')}:${join(HOME, 'Prodigies')}`)
 		.split(':')
 		.filter(Boolean),
@@ -74,9 +81,11 @@ function* walk(dir, depth, match) {
 async function collectTokens(timeZone) {
 	const collector = createTokenCollector();
 	const files = [];
-	for (const dir of walk(CONFIG.logsDir, 6, () => true)) {
-		for (const entry of readdirSync(dir, { withFileTypes: true })) {
-			if (entry.isFile() && entry.name.endsWith('.jsonl')) files.push(join(dir, entry.name));
+	for (const logsDir of CONFIG.logsDirs) {
+		for (const dir of walk(logsDir, 6, () => true)) {
+			for (const entry of readdirSync(dir, { withFileTypes: true })) {
+				if (entry.isFile() && entry.name.endsWith('.jsonl')) files.push(join(dir, entry.name));
+			}
 		}
 	}
 	for (const file of files) {
