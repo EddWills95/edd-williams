@@ -136,12 +136,14 @@
 	};
 </script>
 
-<!-- The anchor is always present so links to #build exist at prerender time; the section only
+<!-- The anchor is always present so links to #code exist at prerender time; the section only
      appears once real data has loaded. -->
+<span class="anchor" id="code"></span>
+<!-- #build is the section's old name; kept so links that already exist still land here. -->
 <span class="anchor" id="build"></span>
 {#if stats}
 	<section class="base-section build-section justify-start" aria-labelledby="build-section-heading">
-		<h2 id="build-section-heading" class="section-title">Build</h2>
+		<h2 id="build-section-heading" class="section-title">Code</h2>
 
 		<p class="mt-2 max-w-prose text-light-cyan text-base">
 			The other half of what I do: what's been going on at the laptop today, counted from my own

@@ -216,7 +216,7 @@
 		font-variant-numeric: lining-nums tabular-nums;
 	}
 
-	/* Same blueprint sheet as the Solar and Build panels: hairline grid, ruled border. */
+	/* Same blueprint sheet as the Solar and Code panels: hairline grid, ruled border. */
 	.gauge {
 		display: flex;
 		flex-direction: column;
