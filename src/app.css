@@ -3,8 +3,27 @@
 @tailwind components;
 @tailwind utilities;
 
+@media (prefers-reduced-motion: no-preference) {
+	html {
+		scroll-behavior: smooth;
+	}
+}
+
+/* One focus ring for the whole site, themed from the palette. */
+:focus-visible {
+	outline: 2px solid var(--burnt-sienna);
+	outline-offset: 3px;
+	border-radius: 2px;
+}
+
+::selection {
+	background: var(--burnt-sienna);
+	color: var(--gunmetal);
+}
+
 html {
-	scroll-behavior: smooth;
+	scrollbar-color: rgba(152, 193, 217, 0.5) var(--gunmetal);
+	accent-color: var(--burnt-sienna);
 }
 
 body {
@@ -22,20 +41,29 @@ body {
 
 	font-family: 'Raleway', sans-serif;
 
-	scroll-behavior: smooth;
-
 	color: white;
 
 	box-sizing: border-box;
 }
 
 .rounded-button {
-	@apply px-2 border-2 rounded-sm flex justify-center items-center hover:bg-bdazzled-blue-500;
+	@apply px-3 border-2 rounded-sm flex justify-center items-center hover:bg-bdazzled-blue-500;
+	min-height: 2.75rem;
 }
 
-/* Used to offset when scrolling about for the header */
+/* Anchors sit just above their section; scroll-margin keeps them clear of the fixed header. */
 .anchor {
-	@apply block invisible -top-16;
+	@apply block invisible h-0;
+	scroll-margin-top: 4rem;
+}
+
+.section-title {
+	@apply mb-6 text-light-cyan;
+	font-size: clamp(1.75rem, 4vw, 2.25rem);
+	font-weight: 500;
+	line-height: 1.15;
+	letter-spacing: -0.01em;
+	text-wrap: balance;
 }
 
 .section-no-padding {
@@ -94,37 +122,6 @@ body {
 	@apply my-0 mx-auto;
 }
 
-@keyframes phrase-cycle {
-	0%,
-	20% {
-		opacity: 1;
-		transform: translateY(0);
-	}
-	25%,
-	95% {
-		opacity: 0;
-		transform: translateY(-8px);
-	}
-	100% {
-		opacity: 0;
-	}
-}
-
-.phrase-cycle {
-	animation: phrase-cycle 10s ease-in-out infinite;
-	opacity: 0;
-}
-
-@media (prefers-reduced-motion: reduce) {
-	.phrase-cycle {
-		animation: none;
-		opacity: 0;
-	}
-	.phrase-cycle:first-child {
-		opacity: 1;
-	}
-}
-
 @keyframes panel-in {
 	from {
 		opacity: 0;
@@ -165,24 +162,46 @@ body {
 	animation: live-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
-@keyframes scroll-cue {
-	0%,
-	100% {
-		transform: translate(-50%, 0);
-	}
-	50% {
-		transform: translate(-50%, 6px);
-	}
-}
-
-.scroll-cue {
-	animation: scroll-cue 1.8s ease-in-out infinite;
-}
-
 @media (prefers-reduced-motion: reduce) {
 	.fade-up,
-	.live-ping,
-	.scroll-cue {
+	.live-ping {
 		animation: none;
+	}
+}
+
+/* Solar and Build: stacked on their own below xl, side by side (rows shared via subgrid so
+   headings, intros and sheets line up) once there is room and both have loaded. */
+.live-row {
+	display: contents;
+}
+
+@media (min-width: 1280px) {
+	.live-row:has(.build-section) {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		grid-template-rows: auto auto 1fr;
+		column-gap: 2.5rem;
+		width: min(100%, 76rem);
+		padding-inline: 3rem;
+	}
+
+	.live-row:has(.build-section) > section {
+		display: grid;
+		grid-template-rows: subgrid;
+		grid-row: 1 / span 3;
+		grid-template-columns: minmax(0, 1fr);
+		width: 100%;
+		padding-inline: 0;
+		align-content: start;
+	}
+
+	.live-row:has(.build-section) > .anchor {
+		position: absolute;
+	}
+
+	.live-row:has(.build-section) > hr {
+		grid-column: 1 / -1;
+		grid-row: 4;
+		margin-top: 2rem;
 	}
 }

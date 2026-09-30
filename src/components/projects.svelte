@@ -36,8 +36,8 @@
 	class="mb-10 p-6 flex flex-col gap-4 border-2 border-burnt-sienna-400 rounded hover:bg-burnt-sienna-400/10 transition-colors"
 >
 	<div>
-		<span class="text-sm uppercase tracking-widest text-burnt-sienna-400">Inventing Mostly</span>
 		<h3 class="text-2xl sm:text-3xl">Where I actually keep most of what I build →</h3>
+		<span class="text-base text-burnt-sienna-400">Inventing Mostly</span>
 	</div>
 	<ul class="flex flex-col gap-3">
 		{#each registry as item}
@@ -47,7 +47,19 @@
 			</li>
 		{/each}
 	</ul>
-	<span class="italic text-base underline">inventing-mostly.com</span>
+	<span class="italic text-base underline underline-offset-4">inventing-mostly.com</span>
+</a>
+
+<a
+	href="#solar"
+	class="mb-10 p-6 flex flex-col gap-1 border-2 border-pale-cerulean/60 rounded hover:bg-bdazzled-blue-500/30 transition-colors"
+>
+	<h3 class="text-2xl sm:text-3xl">Solar</h3>
+	<p class="italic text-pale-cerulean">A live drawing of my flat's solar and battery system</p>
+	<p class="text-base leading-relaxed">
+		Home Assistant, a small proxy I wrote, and a drawing whose lines move when the power does. The
+		biggest thing I run, and it's at the top of this page.
+	</p>
 </a>
 
 <div class="flex flex-col gap-10">
@@ -73,13 +85,13 @@
 			</header>
 			<p class="leading-relaxed">{project.text}</p>
 			{#if project.url || project.github}
-				<div class="flex gap-3">
+				<div class="flex flex-wrap gap-3">
 					{#if project.url}
 						<a
 							href={project.url}
 							target="_blank"
 							rel="noopener noreferrer"
-							class="rounded-button py-1 text-base">Visit site →</a
+							class="rounded-button text-base">Visit site →</a
 						>
 					{/if}
 					{#if project.github}
@@ -87,7 +99,7 @@
 							href={project.github}
 							target="_blank"
 							rel="noopener noreferrer"
-							class="rounded-button py-1 text-base">View code →</a
+							class="rounded-button text-base">View code →</a
 						>
 					{/if}
 				</div>

@@ -1,15 +1,54 @@
 <script>
+	import { tick } from 'svelte';
 	import EddHome from './edd-home.svelte';
 
 	const CVLink =
 		'https://www.dropbox.com/scl/fi/pt5echoorwr9sazn4c7f2/Edd-Williams-2026-CV-Google.pdf?rlkey=4hm3255ymj9eytpjuk14vs4t1&st=oqkzwobm&dl=0';
 
-	function handleOpenMenu() {
-		document.querySelector('#hidden-menu').classList.remove('translate-x-full');
+	const links = [
+		{ href: '#solar', label: 'Solar' },
+		{ href: '#about', label: 'About' },
+		{ href: '#experience', label: 'Experience' },
+		{ href: '#projects', label: 'Projects' },
+		{ href: '#contact', label: 'Contact' }
+	];
+
+	let menuOpen = false;
+	let menuEl;
+	let openButton;
+	let closeButton;
+
+	async function handleOpenMenu() {
+		menuOpen = true;
+		await tick();
+		closeButton?.focus();
 	}
 
 	function handleCloseMenu() {
-		document.querySelector('#hidden-menu').classList.add('translate-x-full');
+		if (!menuOpen) return;
+		menuOpen = false;
+		openButton?.focus();
+	}
+
+	// Keep Tab inside the open menu and let Escape close it.
+	function onKeydown(event) {
+		if (!menuOpen) return;
+		if (event.key === 'Escape') {
+			event.preventDefault();
+			handleCloseMenu();
+			return;
+		}
+		if (event.key !== 'Tab' || !menuEl) return;
+		const focusable = menuEl.querySelectorAll('a[href], button');
+		const first = focusable[0];
+		const last = focusable[focusable.length - 1];
+		if (event.shiftKey && document.activeElement === first) {
+			event.preventDefault();
+			last.focus();
+		} else if (!event.shiftKey && document.activeElement === last) {
+			event.preventDefault();
+			first.focus();
+		}
 	}
 
 	let y = 0;
@@ -43,11 +82,18 @@
 	}
 </script>
 
-<svelte:window bind:scrollY={y} />
+<svelte:window bind:scrollY={y} on:keydown={onKeydown} />
 
 <div
 	id="hidden-menu"
-	class="fixed transition-transform duration-300 h-screen w-screen inset-0 p-4 z-50 translate-x-full bg-bdazzled-blue-700"
+	bind:this={menuEl}
+	role="dialog"
+	aria-modal="true"
+	aria-label="Site menu"
+	inert={!menuOpen}
+	class="fixed transition-transform duration-300 h-screen w-screen inset-0 p-4 z-50 bg-bdazzled-blue-700 {menuOpen
+		? ''
+		: 'translate-x-full'}"
 >
 	<div class="flex justify-between">
 		<EddHome handler={handleCloseMenu} />
@@ -55,7 +101,8 @@
 			type="button"
 			aria-label="Close menu"
 			on:click={handleCloseMenu}
-			class="absolute right-4 top-4"
+			bind:this={closeButton}
+			class="icon-button absolute right-2 top-2"
 		>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
@@ -63,6 +110,7 @@
 				fill="none"
 				viewBox="0 0 24 24"
 				stroke="currentColor"
+				aria-hidden="true"
 			>
 				<path
 					stroke-linecap="round"
@@ -73,40 +121,18 @@
 			</svg>
 		</button>
 	</div>
-	<nav class="mt-8">
-		<ul class="list-none flex flex-col gap-4 text-2xl sm:hidden">
-			<li
-				class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2"
-			>
-				<a on:click={handleCloseMenu} href="#about">About</a>
-			</li>
-			<li
-				class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2"
-			>
-				<a on:click={handleCloseMenu} href="#experience">Experience</a>
-			</li>
-			<li
-				class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2"
-			>
-				<a on:click={handleCloseMenu} href="#build">Build</a>
-			</li>
-			<li
-				class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2"
-			>
-				<a on:click={handleCloseMenu} href="#home-lab">Home Lab</a>
-			</li>
-			<li
-				class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2"
-			>
-				<a on:click={handleCloseMenu} href="#projects">Projects</a>
-			</li>
-			<li
-				class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2"
-			>
-				<a on:click={handleCloseMenu} href="#contact">Contact</a>
-			</li>
-			<li class="h-8 w-auto flex justify-center items-center">
-				<a href={CVLink} target="_blank" class="w-12 rounded-button">CV</a>
+	<nav aria-label="Menu" class="mt-8">
+		<ul class="list-none flex flex-col gap-2 text-2xl">
+			{#each links as link}
+				<li>
+					<a class="nav-link justify-center" on:click={handleCloseMenu} href={link.href}
+						>{link.label}</a
+					>
+				</li>
+			{/each}
+			<li class="flex justify-center">
+				<a href={CVLink} target="_blank" rel="noopener noreferrer" class="w-16 rounded-button">CV</a
+				>
 			</li>
 		</ul>
 	</nav>
@@ -114,18 +140,27 @@
 
 <header
 	id="header"
-	class="fixed w-full transition-transform flex justify-between items-center p-4 bg-gunmetal z-40 {headerClass}"
+	class="fixed w-full transition-transform flex justify-between items-center px-4 py-2 bg-gunmetal z-40 {headerClass}"
 >
 	<EddHome />
 
 	<!-- Mobile -->
-	<button type="button" aria-label="Open menu" on:click={handleOpenMenu} class="sm:hidden">
+	<button
+		type="button"
+		aria-label="Open menu"
+		aria-expanded={menuOpen}
+		aria-controls="hidden-menu"
+		on:click={handleOpenMenu}
+		bind:this={openButton}
+		class="icon-button mobile-only"
+	>
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
 			class="h-6 w-6"
 			fill="none"
 			viewBox="0 0 24 24"
 			stroke="currentColor"
+			aria-hidden="true"
 		>
 			<path
 				stroke-linecap="round"
@@ -137,27 +172,45 @@
 	</button>
 
 	<!-- Regular -->
-	<ul class="hidden list-none gap-2 md:flex">
-		<li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2">
-			<a href="#about">About</a>
-		</li>
-		<li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2">
-			<a href="#experience">Experience</a>
-		</li>
-		<li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2">
-			<a href="#build">Build</a>
-		</li>
-		<li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2">
-			<a href="#home-lab">Home Lab</a>
-		</li>
-		<li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2">
-			<a href="#projects">Projects</a>
-		</li>
-		<li class="h-8 w-auto px-2 flex justify-center items-center hover:underline underline-offset-2">
-			<a href="#contact">Contact</a>
-		</li>
-		<li class="h-8 w-auto">
-			<a href={CVLink} target="_blank" class="w-12 rounded-button">CV</a>
-		</li>
-	</ul>
+	<nav aria-label="Main" class="hidden sm:block">
+		<ul class="list-none gap-1 flex items-center">
+			{#each links as link}
+				<li>
+					<a class="nav-link" href={link.href}>{link.label}</a>
+				</li>
+			{/each}
+			<li>
+				<a href={CVLink} target="_blank" rel="noopener noreferrer" class="w-14 rounded-button">CV</a
+				>
+			</li>
+		</ul>
+	</nav>
 </header>
+
+<style>
+	.icon-button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 2.75rem;
+		height: 2.75rem;
+	}
+
+	@media (min-width: 640px) {
+		.icon-button.mobile-only {
+			display: none;
+		}
+	}
+
+	.nav-link {
+		display: flex;
+		align-items: center;
+		min-height: 2.75rem;
+		padding: 0 0.5rem;
+		text-underline-offset: 4px;
+	}
+
+	.nav-link:hover {
+		text-decoration: underline;
+	}
+</style>

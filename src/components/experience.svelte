@@ -174,7 +174,7 @@
 					type="button"
 					on:click={() => (selected = option)}
 					aria-current={selected.id === option.id}
-					class="timeline-item group relative w-full whitespace-nowrap px-3 py-2 text-left origin-left transition-all duration-200 hover:cursor-pointer sm:whitespace-normal sm:py-3 sm:pl-6 sm:hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-pale-cerulean rounded-sm"
+					class="timeline-item group relative w-full whitespace-nowrap px-3 py-2 min-h-[2.75rem] text-left origin-left transition-all duration-200 hover:cursor-pointer sm:whitespace-normal sm:py-3 sm:pl-6 sm:hover:scale-110 rounded-sm"
 					class:timeline-selected={selected.id === option.id}
 				>
 					<span
@@ -182,7 +182,7 @@
 					></span>
 					<span class="block text-base sm:text-lg leading-tight">{option.buttonText}</span>
 					{#if option.dates}
-						<span class="block text-xs text-pale-cerulean">{option.dates}</span>
+						<span class="block text-sm text-pale-cerulean">{option.dates}</span>
 					{/if}
 				</button>
 			</li>

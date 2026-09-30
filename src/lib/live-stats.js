@@ -12,10 +12,14 @@ const MAX_BACKOFF_MS = 10 * 60_000;
 async function devMock(name) {
 	if (!import.meta.env.DEV) return null;
 	const params = new URLSearchParams(window.location.search);
-	const fixtures = await import('../components/home-lab-fixtures.js');
+	const fixtures = await import('../components/balcony-solar-fixtures.js');
 	if (name === 'energy') {
 		const variant = params.get('mock');
 		return variant ? fixtures.mockStats(variant) : null;
+	}
+	if (name === 'history') {
+		const variant = params.get('mockhistory') ?? (params.has('mock') ? 'normal' : null);
+		return variant ? fixtures.mockHistory(variant) : null;
 	}
 	const variant = params.get('mockbuild') ?? (params.has('mock') ? 'normal' : null);
 	return variant ? fixtures.mockBuildStats(variant) : null;
@@ -99,4 +103,5 @@ function poller(name, path, intervalMs) {
 }
 
 export const energyStats = poller('energy', '/api/energy-stats', 75_000);
+export const energyHistory = poller('history', '/api/energy-history', 10 * 60_000);
 export const buildStats = poller('build', '/api/build-stats', 5 * 60_000);

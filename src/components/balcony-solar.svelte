@@ -1,7 +1,9 @@
 <script>
 	import { onMount, onDestroy } from 'svelte';
-	import FlatDrawing from './home-lab-flat.svelte';
+	import FlowCanvas from './balcony-solar-canvas.svelte';
 	import { energyStats } from '$lib/live-stats.js';
+	import { replay } from '$lib/replay.js';
+	import DayStrip from './balcony-solar-day.svelte';
 
 	// The proxy caches for a minute and we poll every ~75s; well past that, the flat has stopped
 	// checking in.
@@ -50,22 +52,43 @@
 	$: stale =
 		status === 'ready' &&
 		(stats?.stale === true || !validAsOf || now - validAsOf.getTime() > STALE_AFTER_MS);
-	$: live = status === 'ready' && !stale;
+	// While the day strip is being scrubbed (or plays out), the diagram shows that moment instead.
+	$: replaying = $replay !== null && !!stats;
+	$: live = status === 'ready' && (replaying || !stale);
+	$: view = replaying
+		? {
+				...stats,
+				solarPowerW: $replay.solarW ?? undefined,
+				housePowerW: $replay.houseW ?? undefined,
+				gridPowerW: $replay.gridW ?? undefined,
+				batterySoc: $replay.soc ?? stats.batterySoc,
+				batteryPowerW: Math.abs($replay.batteryW ?? 0),
+				batteryAction:
+					$replay.batteryW === null
+						? 'Unknown'
+						: $replay.batteryW > 25
+							? 'Discharging'
+							: $replay.batteryW < -25
+								? 'Charging'
+								: 'Holding',
+				solarGenerationTodayKwh: $replay.solarKwh ?? 0
+			}
+		: stats;
 
-	$: hasSolarNow = isNum(stats?.solarPowerW);
-	$: hasHouse = isNum(stats?.housePowerW);
-	$: hasGrid = isNum(stats?.gridPowerW);
-	$: hasSavingsToday = isNum(stats?.batterySavingsToday);
-	$: hasTea = isNum(stats?.kettleCupsToday);
+	$: hasSolarNow = isNum(view?.solarPowerW);
+	$: hasHouse = isNum(view?.housePowerW);
+	$: hasGrid = isNum(view?.gridPowerW);
+	$: hasSavingsToday = isNum(view?.batterySavingsToday);
+	$: hasTea = isNum(view?.kettleCupsToday);
 	$: batteryMoving =
-		isNum(stats?.batteryPowerW) &&
-		Math.abs(stats.batteryPowerW) > 0 &&
-		(stats.batteryAction === 'Charging' || stats.batteryAction === 'Discharging');
+		isNum(view?.batteryPowerW) &&
+		Math.abs(view.batteryPowerW) > 0 &&
+		(view.batteryAction === 'Charging' || view.batteryAction === 'Discharging');
 	$: gridDirection = !hasGrid
 		? null
-		: Math.abs(stats.gridPowerW) < 5
+		: Math.abs(view.gridPowerW) < 5
 			? 'balanced'
-			: stats.gridPowerW > 0
+			: view.gridPowerW > 0
 				? 'importing'
 				: 'exporting';
 
@@ -73,37 +96,37 @@
 	$: flows = live
 		? {
 				solar: {
-					active: hasSolarNow && stats.solarPowerW > 0,
+					active: hasSolarNow && view.solarPowerW > 0,
 					reverse: false,
-					seconds: secondsFor(stats.solarPowerW ?? 0)
+					seconds: secondsFor(view.solarPowerW ?? 0)
 				},
 				load: {
-					active: hasHouse && stats.housePowerW > 0,
+					active: hasHouse && view.housePowerW > 0,
 					reverse: false,
-					seconds: secondsFor(stats.housePowerW ?? 0)
+					seconds: secondsFor(view.housePowerW ?? 0)
 				},
 				battery: {
 					active: batteryMoving,
-					reverse: stats.batteryAction === 'Discharging',
-					seconds: secondsFor(stats.batteryPowerW ?? 0)
+					reverse: view.batteryAction === 'Discharging',
+					seconds: secondsFor(view.batteryPowerW ?? 0)
 				},
 				grid: {
 					active: gridDirection === 'importing' || gridDirection === 'exporting',
 					reverse: gridDirection === 'exporting',
-					seconds: secondsFor(stats.gridPowerW ?? 0)
+					seconds: secondsFor(view.gridPowerW ?? 0)
 				}
 			}
 		: {};
 
-	$: summary = stats
+	$: summary = view
 		? [
 				hasSolarNow
-					? `balcony solar panels producing ${formatPower(stats.solarPowerW)}`
-					: `balcony solar panels have produced ${kwh(stats.solarGenerationTodayKwh, 2)} kWh today`,
-				`battery at ${Math.round(stats.batterySoc)}%${batteryMoving ? `, ${stats.batteryAction.toLowerCase()} at ${formatPower(stats.batteryPowerW)}` : ''}`,
-				hasHouse ? `flat using ${formatPower(stats.housePowerW)}` : null,
+					? `balcony solar panels producing ${formatPower(view.solarPowerW)}`
+					: `balcony solar panels have produced ${kwh(view.solarGenerationTodayKwh, 2)} kWh today`,
+				`battery at ${Math.round(view.batterySoc)}%${batteryMoving ? `, ${view.batteryAction.toLowerCase()} at ${formatPower(view.batteryPowerW)}` : ''}`,
+				hasHouse ? `flat using ${formatPower(view.housePowerW)}` : null,
 				gridDirection === 'importing' || gridDirection === 'exporting'
-					? `${gridDirection} ${formatPower(stats.gridPowerW)} ${gridDirection === 'importing' ? 'from' : 'to'} the grid`
+					? `${gridDirection} ${formatPower(view.gridPowerW)} ${gridDirection === 'importing' ? 'from' : 'to'} the grid`
 					: gridDirection === 'balanced'
 						? 'drawing nothing from the grid'
 						: null
@@ -112,17 +135,43 @@
 				.join('; ')
 		: '';
 
+	const UNKNOWN = { value: '––', detail: '' };
+	$: nodes =
+		status === 'ready' && view
+			? {
+					solar: hasSolarNow
+						? {
+								value: formatPower(view.solarPowerW),
+								detail: `${kwh(view.solarGenerationTodayKwh, 2)} kWh today`
+							}
+						: { value: `${kwh(view.solarGenerationTodayKwh, 2)} kWh`, detail: 'generated today' },
+					battery: {
+						value: `${Math.round(view.batterySoc)}%`,
+						detail: `${view.batteryAction ?? 'Unknown'}${batteryMoving ? ` · ${formatPower(view.batteryPowerW)}` : ''}`
+					},
+					grid: hasGrid
+						? {
+								value: gridDirection === 'balanced' ? '0 W' : formatPower(view.gridPowerW),
+								detail: gridDirection
+							}
+						: UNKNOWN,
+					load: hasHouse ? { value: formatPower(view.housePowerW), detail: 'in use' } : UNKNOWN
+				}
+			: { solar: UNKNOWN, battery: UNKNOWN, grid: UNKNOWN, load: UNKNOWN };
+
 	const timeFormat = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit' });
 </script>
 
+<!-- #home-lab is the section's old name; kept so links that already exist still land here. -->
 <span class="anchor" id="home-lab"></span>
-<section class="base-section justify-start" aria-labelledby="home-lab-heading">
-	<h2 id="home-lab-heading" class="text-2xl mb-4">Home Lab</h2>
+<span class="anchor" id="solar"></span>
+<section class="base-section justify-start" aria-labelledby="solar-heading">
+	<h2 id="solar-heading" class="section-title">Solar</h2>
 
-	<p class="p-4 mt-4 text-light-cyan text-base">
-		Alongside the day job, I run a small home lab — solar, battery storage, and a pile of
-		self-hosted services. This is my flat, drawn from the same Home Assistant setup that runs it:
-		the lines move when power does.
+	<p class="mt-2 max-w-prose text-light-cyan text-base">
+		Alongside the day job: solar panels on my balcony, a battery in the flat, and a pile of
+		self-hosted services keeping an eye on it all. This is the flat's power as a single-line
+		diagram, drawn from the same Home Assistant setup that runs it: the lines move when power does.
 	</p>
 
 	<figure class="sheet mt-4" aria-busy={status === 'loading'}>
@@ -130,59 +179,28 @@
 			<p class="mock-flag">Mock data: dev fixture, not real readings</p>
 		{/if}
 
-		<div class="relative">
-			<FlatDrawing
-				{flows}
-				soc={status === 'ready' ? stats.batterySoc : null}
-				sunOut={live && hasSolarNow && stats.solarPowerW > 0}
-				dim={status !== 'ready' || stale}
-			/>
+		<FlowCanvas
+			{flows}
+			{nodes}
+			soc={status === 'ready' ? view.batterySoc : null}
+			sunOut={live && hasSolarNow && view.solarPowerW > 0}
+			dim={status !== 'ready' || (stale && !replaying)}
+		/>
 
-			{#if status === 'ready'}
-				<p class="sr-only">Live reading from the flat: {summary}.</p>
+		{#if replaying}
+			<p class="replay-flag" aria-hidden="true">
+				Replaying {new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit' }).format(
+					$replay.t
+				)}
+			</p>
+		{/if}
 
-				<dl class="readouts" aria-hidden="true">
-					<div class="readout" style="--x: 80.5%; --y: 42%">
-						<dt><span class="key key-solar"></span>Solar</dt>
-						{#if hasSolarNow}
-							<dd class="value nums">{formatPower(stats.solarPowerW)}</dd>
-							<dd class="detail nums">{kwh(stats.solarGenerationTodayKwh, 2)} kWh today</dd>
-						{:else}
-							<dd class="value nums">{kwh(stats.solarGenerationTodayKwh, 2)} kWh</dd>
-							<dd class="detail">generated today</dd>
-						{/if}
-					</div>
-
-					<div class="readout" style="--x: 2%; --y: 31%">
-						<dt><span class="key key-battery"></span>Battery</dt>
-						<dd class="value nums">{Math.round(stats.batterySoc)}%</dd>
-						<dd class="detail nums">
-							{stats.batteryAction ?? 'Unknown'}{batteryMoving
-								? ` · ${formatPower(stats.batteryPowerW)}`
-								: ''}
-						</dd>
-					</div>
-
-					{#if hasHouse}
-						<div class="readout" style="--x: 80.5%; --y: 62%">
-							<dt><span class="key key-load"></span>Flat</dt>
-							<dd class="value nums">{formatPower(stats.housePowerW)}</dd>
-							<dd class="detail">in use</dd>
-						</div>
-					{/if}
-
-					{#if hasGrid}
-						<div class="readout" style="--x: 2%; --y: 56%">
-							<dt><span class="key key-grid"></span>Grid</dt>
-							<dd class="value nums">
-								{gridDirection === 'balanced' ? '0 W' : formatPower(stats.gridPowerW)}
-							</dd>
-							<dd class="detail">{gridDirection}</dd>
-						</div>
-					{/if}
-				</dl>
-			{/if}
-		</div>
+		{#if status === 'ready'}
+			<DayStrip />
+			<p class="sr-only">
+				{replaying ? 'Replaying an earlier moment' : 'Live reading from the flat'}: {summary}.
+			</p>
+		{/if}
 
 		<figcaption class="title-block" class:has-tea={hasTea && status === 'ready'}>
 			{#if status === 'loading'}
@@ -190,8 +208,7 @@
 			{:else if status === 'error'}
 				<div class="state-note col-span-full flex flex-wrap items-center gap-x-4 gap-y-2">
 					<p>
-						Couldn't reach the live stats right now — the home lab might be offline, or having a
-						nap.
+						Couldn't reach the live stats right now — the flat might be offline, or having a nap.
 					</p>
 					<button type="button" class="retry" on:click={() => energyStats.refresh()}
 						>Try again</button
@@ -229,7 +246,7 @@
 					</div>
 				{/if}
 
-				<div class="cell">
+				<div class="cell cell-last">
 					<span class="label">Last reading</span>
 					{#if validAsOf}
 						<time class="mid nums" datetime={validAsOf.toISOString()}
@@ -260,6 +277,8 @@
 	/* Plain CSS rather than @apply: Tailwind-in-<style> sends vite-plugin-svelte's dependency
 	   watcher into infinite recursion in dev. Colours are the tailwind.config.cjs tokens. */
 	.sheet {
+		container-type: inline-size;
+		width: 100%;
 		position: relative;
 		max-width: 40rem;
 		margin-left: auto;
@@ -270,6 +289,20 @@
 			linear-gradient(rgba(152, 193, 217, 0.045) 1px, transparent 1px),
 			linear-gradient(90deg, rgba(152, 193, 217, 0.045) 1px, transparent 1px);
 		background-size: 8px 8px;
+	}
+
+	.replay-flag {
+		position: absolute;
+		top: 0.5rem;
+		left: 50%;
+		transform: translateX(-50%);
+		z-index: 10;
+		padding: 0 0.5rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		background: #293241;
+		color: #e0fbfc;
+		pointer-events: none;
 	}
 
 	.mock-flag {
@@ -285,29 +318,11 @@
 	}
 
 	.nums {
+		font-family: 'IBM Plex Mono', ui-monospace, monospace;
 		font-variant-numeric: lining-nums tabular-nums;
 	}
 
-	/* Readouts: a key grid under the drawing on small screens, pinned beside their part of
-	   the flat from md up. */
-	.readouts {
-		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 1.25rem 1rem;
-		padding: 0.5rem 1rem 1.25rem;
-		border-top: 1px solid rgba(152, 193, 217, 0.3);
-	}
-
-	.readout {
-		display: flex;
-		flex-direction: column;
-	}
-
-	.readout dt,
 	.label {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
 		font-size: 0.875rem;
 		line-height: 1.25rem;
 		font-weight: 500;
@@ -316,61 +331,10 @@
 		color: #98c1d9;
 	}
 
-	.key {
-		display: inline-block;
-		width: 1rem;
-		height: 0.25rem;
-		border-radius: 9999px;
-	}
-
-	.key-solar {
-		background: #f28b72;
-	}
-	.key-battery {
-		background: #e0fbfc;
-	}
-	.key-load {
-		background: #f9c8bd;
-	}
-	.key-grid {
-		background: #98c1d9;
-	}
-
-	.value {
-		font-size: 1.5rem;
-		line-height: 1.25;
-		color: #e0fbfc;
-	}
-
 	.detail {
 		font-size: 0.875rem;
 		line-height: 1.25rem;
 		color: #98c1d9;
-	}
-
-	@media (min-width: 768px) {
-		.readouts {
-			display: block;
-			padding: 0;
-			border: 0;
-		}
-
-		.readout {
-			position: absolute;
-			left: var(--x);
-			top: var(--y);
-		}
-
-		.value {
-			font-size: 1.125rem;
-		}
-
-		.readout dt,
-		.label,
-		.detail {
-			font-size: 0.75rem;
-			line-height: 1rem;
-		}
 	}
 
 	/* Title block: the corner of an architect's sheet where the drawing's facts live. */
@@ -390,16 +354,48 @@
 	}
 
 	.cell-feature,
-	.cell-wide,
-	.cell-tea {
+	.cell-wide {
 		grid-column: span 2 / span 2;
+	}
+
+	/* Narrow sheet, two columns: solar | tea pair up, the last reading spans the row. */
+	.has-tea .cell-last {
+		grid-column: span 2 / span 2;
+	}
+
+	@container (max-width: 29.99rem) {
+		.title-block .cell:nth-child(even):not(.cell-feature):not(.cell-wide) {
+			border-left: 1px solid rgba(152, 193, 217, 0.3);
+		}
+	}
+
+	/* Mid-width sheet (a half-width column, say): the facts run three across instead of a tall
+	   two-column stack. */
+	@container (min-width: 30rem) {
+		.title-block,
+		.has-tea {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+
+		.cell-feature,
+		.cell-wide {
+			grid-column: span 3 / span 3;
+		}
+
+		.has-tea .cell-last {
+			grid-column: auto;
+		}
+
+		.title-block .cell:nth-child(n + 3):not(.cell-wide) {
+			border-left: 1px solid rgba(152, 193, 217, 0.3);
+		}
 	}
 
 	.cell-feature {
 		border-top: 0;
 	}
 
-	@media (min-width: 640px) {
+	@container (min-width: 44rem) {
 		.title-block {
 			grid-template-columns: repeat(4, minmax(0, 1fr));
 		}
@@ -409,13 +405,18 @@
 			border-left: 1px solid rgba(152, 193, 217, 0.3);
 		}
 
+		.title-block {
+			grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(0, 1fr));
+		}
+
 		.has-tea {
-			grid-template-columns: repeat(5, minmax(0, 1fr));
+			grid-template-columns: minmax(0, 1.5fr) repeat(4, minmax(0, 1fr));
 		}
 
 		.cell-feature,
 		.cell-wide,
-		.cell-tea {
+		.cell-tea,
+		.has-tea .cell-last {
 			grid-column: auto;
 		}
 
@@ -424,10 +425,18 @@
 		}
 	}
 
+	/* Beside the Build sheet the page's row sets the width. */
+	@media (min-width: 1280px) {
+		.sheet {
+			max-width: none;
+		}
+	}
+
 	.big {
-		font-size: 1.875rem;
+		font-size: 1.625rem;
 		line-height: 1.2;
 		color: #f28b72;
+		overflow-wrap: anywhere;
 	}
 
 	.mid {

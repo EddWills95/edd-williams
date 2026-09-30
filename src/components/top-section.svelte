@@ -1,12 +1,37 @@
 <script>
+	import { onMount } from 'svelte';
+	import { tweened } from 'svelte/motion';
+	import { quartOut } from 'svelte/easing';
 	import { energyStats, buildStats } from '$lib/live-stats.js';
 
+	const SEGMENTS = 10;
+	const indices = [...Array(SEGMENTS).keys()];
+
+	$: status = $energyStats.status;
 	$: stats = $energyStats.data;
 	$: today = $buildStats.data?.today;
 	$: build =
 		today && [today.written, today.linesAdded, today.commits].every(Number.isInteger)
 			? today
 			: null;
+
+	$: soc = Number.isFinite(stats?.batterySoc) ? Math.min(Math.max(stats.batterySoc, 0), 100) : null;
+	$: solarToday = Number.isFinite(stats?.solarGenerationTodayKwh)
+		? stats.solarGenerationTodayKwh
+		: null;
+	$: cups = Number.isInteger(stats?.kettleCupsToday) ? stats.kettleCupsToday : null;
+	$: cupIcons = cups === null ? [] : [...Array(Math.min(cups, 8)).keys()];
+	$: charging = stats?.batteryAction === 'Charging';
+
+	// The gauge fills from empty to the real reading once, when the data first lands.
+	const level = tweened(0, { duration: 1600, easing: quartOut });
+	let reduced = false;
+	onMount(() => {
+		reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	});
+	$: if (soc !== null) level.set(soc, { duration: reduced ? 0 : 1600 });
+
+	$: filled = ($level / 100) * SEGMENTS;
 
 	// 5,780,295 -> "5.8M", 15,368 -> "15.4k", 34 -> "34"
 	function compact(n) {
@@ -15,115 +40,338 @@
 		if (n >= 1e4) return `${(n / 1e3).toFixed(1)}k`;
 		return n.toLocaleString('en-GB');
 	}
-
-	function visitCode() {
-		window.open('https://github.com/EddWills95/edd-williams', '_blank');
-	}
 </script>
 
-<section id="banner" class="section-no-padding relative text-2xl items-center justify-center">
-	<h1 class="flex flex-col gap-2">
-		<span class="fade-up text-base font-mono font-thin">Hey 👋<br /></span>
-		<span class="fade-up text-4xl text-burnt-sienna-400" style="animation-delay: 0.15s"
-			>I'm Edd <br /></span
+<section
+	id="banner"
+	class="relative w-full min-h-[calc(100svh-4rem)] mt-16 flex flex-col items-center justify-center"
+	aria-labelledby="banner-heading"
+>
+	<div
+		class="grid w-full gap-10 px-4 py-10 sm:px-12 lg:w-8/12 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:items-center"
+	>
+		<div class="flex flex-col gap-6">
+			<h1 id="banner-heading" class="hero-title fade-up">
+				<span class="block text-burnt-sienna-400">Edd Williams</span>
+				<span class="block text-light-cyan"
+					>Software engineer. Solar and batteries on the side.</span
+				>
+			</h1>
+
+			<p class="fade-up max-w-prose text-lg text-pale-cerulean" style="animation-delay: 0.12s">
+				I build products for web and mobile, and I run my own solar, battery storage and Bitcoin
+				node at home. The numbers next to this are live from my flat.
+			</p>
+
+			<p class="fade-up flex flex-wrap gap-x-6 gap-y-1 text-base" style="animation-delay: 0.24s">
+				<a class="hero-link" href="#solar">See the solar</a>
+				<a class="hero-link" href="#projects">Projects</a>
+				<a class="hero-link" href="#contact">Say hi</a>
+			</p>
+		</div>
+
+		<!-- Reserved height, so the live readout never shifts the page when it arrives. -->
+		<a
+			href="#solar"
+			class="gauge fade-up"
+			style="animation-delay: 0.36s"
+			aria-label="Live from my flat. Jump to the Solar section."
 		>
-		<span class="fade-up text-3xl flex-col gap-2 text-light-cyan" style="animation-delay: 0.3s">
-			I build cool things
-		</span>
-		<div class="fade-up flex text-3xl text-light-cyan" style="animation-delay: 0.45s">
-			<span class="ml-[94px] h-9 relative inline-block min-w-[220px]">
-				<span class="phrase-cycle absolute inset-0 whitespace-nowrap" style="animation-delay: 0s"
-					>for the web 🌐</span
+			<span class="gauge-head">
+				<span class="relative flex h-2.5 w-2.5 shrink-0" aria-hidden="true">
+					{#if status === 'ready'}
+						<span
+							class="live-ping absolute inline-flex h-full w-full rounded-full bg-burnt-sienna-400"
+						></span>
+					{/if}
+					<span
+						class="relative inline-flex h-2.5 w-2.5 rounded-full"
+						class:bg-burnt-sienna-400={status === 'ready'}
+						class:bg-pale-cerulean={status !== 'ready'}
+					></span>
+				</span>
+				<span>{status === 'ready' ? 'Live from my flat' : 'My flat'}</span>
+			</span>
+
+			<svg
+				class="battery"
+				class:charging
+				viewBox="0 0 220 56"
+				role="img"
+				aria-label={soc === null
+					? 'Battery level unknown'
+					: `Battery at ${Math.round(soc)} percent`}
+			>
+				<rect x="1" y="1" width="206" height="54" rx="3" class="shell" />
+				<rect x="209" y="17" width="9" height="22" rx="2" class="cap" />
+				{#each indices as i}
+					<rect
+						x={7 + i * 20}
+						y="7"
+						width="16"
+						height="42"
+						rx="1.5"
+						class="cell"
+						class:on={filled > i}
+						class:tip={filled > i && filled < i + 1}
+						style="--part: {Math.min(Math.max(filled - i, 0), 1)}"
+					/>
+				{/each}
+			</svg>
+
+			<span class="gauge-read">
+				<span class="gauge-big data"
+					>{soc === null ? '––' : Math.round($level)}<small>%</small></span
 				>
-				<span class="phrase-cycle absolute inset-0 whitespace-nowrap" style="animation-delay: 2.5s"
-					>for mobile 📱</span
-				>
-				<span class="phrase-cycle absolute inset-0 whitespace-nowrap" style="animation-delay: 5s"
-					>with batteries 🔋</span
-				>
-				<span
-					class="phrase-cycle absolute inset-0 flex items-center whitespace-nowrap"
-					style="animation-delay: 7.5s"
-				>
-					on bitcoin
-					<svg class="inline ml-2" xmlns="http://www.w3.org/2000/svg" width="32" height="32"
-						><g fill="none" fill-rule="evenodd"
-							><circle cx="16" cy="16" r="16" fill="#F7931A" /><path
-								fill="#FFF"
-								fill-rule="nonzero"
-								d="M23.189 14.02c.314-2.096-1.283-3.223-3.465-3.975l.708-2.84-1.728-.43-.69 2.765c-.454-.114-.92-.22-1.385-.326l.695-2.783L15.596 6l-.708 2.839c-.376-.086-.746-.17-1.104-.26l.002-.009-2.384-.595-.46 1.846s1.283.294 1.256.312c.7.175.826.638.805 1.006l-.806 3.235c.048.012.11.03.18.057l-.183-.045-1.13 4.532c-.086.212-.303.531-.793.41.018.025-1.256-.313-1.256-.313l-.858 1.978 2.25.561c.418.105.828.215 1.231.318l-.715 2.872 1.727.43.708-2.84c.472.127.93.245 1.378.357l-.706 2.828 1.728.43.715-2.866c2.948.558 5.164.333 6.097-2.333.752-2.146-.037-3.385-1.588-4.192 1.13-.26 1.98-1.003 2.207-2.538zm-3.95 5.538c-.533 2.147-4.148.986-5.32.695l.95-3.805c1.172.293 4.929.872 4.37 3.11zm.535-5.569c-.487 1.953-3.495.96-4.47.717l.86-3.45c.975.243 4.118.696 3.61 2.733z"
-							/></g
-						></svg
-					>
+				<span class="gauge-side data">
+					{#if status === 'ready' && solarToday !== null}
+						{solarToday.toFixed(1)} kWh solar today
+					{:else if status === 'error' || status === 'empty'}
+						Not reporting right now
+					{:else}
+						Checking in…
+					{/if}
 				</span>
 			</span>
-		</div>
-	</h1>
 
-	{#if stats || build}
-		<div class="fade-up mt-10 flex flex-col items-center gap-3 px-4 text-center">
-			{#if stats}
-				<a
-					href="#home-lab"
-					class="flex items-center gap-3 rounded-full border border-pale-cerulean/60 px-4 py-2 text-base hover:bg-bdazzled-blue-500/30 transition-colors"
-				>
-					<span class="relative flex h-2.5 w-2.5 shrink-0">
-						<span
-							class="live-ping absolute inline-flex h-full w-full rounded-full bg-burnt-sienna-400"
-						></span>
-						<span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-burnt-sienna-400"></span>
+			{#if cups !== null}
+				<span class="gauge-tea data">
+					<span class="cups" aria-hidden="true">
+						{#each cupIcons as i}
+							<svg class="cup" viewBox="0 0 24 24" style="--i: {i}">
+								<path
+									class="steam"
+									d="M8 7c-1-1.5 1-2.5 0-4M12 7c-1-1.5 1-2.5 0-4M16 7c-1-1.5 1-2.5 0-4"
+								/>
+								<path
+									class="mug"
+									d="M4 10h13v4a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM17 11h1.5a2.5 2.5 0 0 1 0 5H17"
+								/>
+							</svg>
+						{/each}
 					</span>
-					<span
-						>Live from my flat: 🔋 {stats.batterySoc}% · ☀️ {stats.solarGenerationTodayKwh.toFixed(
-							1
-						)} kWh today</span
-					>
-				</a>
+					<span>{cups} {cups === 1 ? 'cup' : 'cups'} of tea today (estimated from the kettle)</span>
+				</span>
 			{/if}
-			{#if build}
-				<a
-					href="#build"
-					class="flex items-center gap-3 rounded-2xl border border-pale-cerulean/60 px-4 py-2 text-base hover:bg-bdazzled-blue-500/30 transition-colors"
-				>
-					<span class="relative flex h-2.5 w-2.5 shrink-0">
-						<span
-							class="live-ping absolute inline-flex h-full w-full rounded-full bg-burnt-sienna-400"
-						></span>
-						<span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-burnt-sienna-400"></span>
-					</span>
-					<span
-						>Live from my laptop: ⌨️ {compact(build.written)} tokens · {compact(build.linesAdded)} lines
-						· {compact(build.commits)} commits today</span
-					>
-				</a>
-			{/if}
-		</div>
-	{/if}
+
+			<span class="gauge-foot data">
+				{#if build}
+					{compact(build.written)} tokens · {compact(build.linesAdded)} lines · {compact(
+						build.commits
+					)} commits today
+				{:else}
+					&nbsp;
+				{/if}
+			</span>
+		</a>
+	</div>
 
 	<a
-		href="#about"
-		aria-label="Scroll to About"
-		class="scroll-cue absolute bottom-6 left-1/2 -translate-x-1/2 text-pale-cerulean"
-	>
-		<svg
-			xmlns="http://www.w3.org/2000/svg"
-			class="h-6 w-6"
-			fill="none"
-			viewBox="0 0 24 24"
-			stroke="currentColor"
-			stroke-width="2"
-			><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg
-		>
-	</a>
-
-	<button
-		type="button"
+		href="https://github.com/EddWills95/edd-williams"
+		target="_blank"
+		rel="noopener noreferrer"
 		aria-label="View this site's source code on GitHub"
-		class="absolute bottom-0 right-0 bg-white text-black w-24 h-20 text-sm hover:cursor-pointer bg-bottom
+		class="peel absolute bottom-0 right-0 bg-white text-black w-24 h-20 bg-bottom
     before:absolute before:w-48 before:h-40 before:-top-28 before:-left-24 before:rotate-45 before:bg-gunmetal
     hover:before:-translate-x-2 hover:before:-translate-y-2 before:transition-transform
     "
 		style="background-image: url('./code.png')"
-		on:click={visitCode}
-	></button>
+	></a>
 </section>
+
+<style>
+	.hero-title {
+		font-size: clamp(2.25rem, 6vw, 4rem);
+		line-height: 1.05;
+		font-weight: 500;
+		letter-spacing: -0.02em;
+		text-wrap: balance;
+	}
+
+	.hero-title span + span {
+		margin-top: 0.75rem;
+		font-size: clamp(1.5rem, 3.2vw, 2rem);
+		line-height: 1.2;
+		letter-spacing: 0;
+		font-weight: 400;
+	}
+
+	.hero-link {
+		display: inline-flex;
+		align-items: center;
+		min-height: 2.75rem;
+		color: #e0fbfc;
+		text-decoration: underline;
+		text-decoration-color: rgba(152, 193, 217, 0.6);
+		text-underline-offset: 6px;
+		transition: text-decoration-color 0.15s ease-out;
+	}
+
+	.hero-link:hover {
+		text-decoration-color: #f28b72;
+	}
+
+	.data {
+		font-family: 'IBM Plex Mono', ui-monospace, monospace;
+		font-variant-numeric: lining-nums tabular-nums;
+	}
+
+	/* Same blueprint sheet as the Solar and Build panels: hairline grid, ruled border. */
+	.gauge {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		min-height: 19rem;
+		padding: 1.25rem;
+		border: 2px solid rgba(152, 193, 217, 0.6);
+		border-radius: 2px;
+		background-image:
+			linear-gradient(rgba(152, 193, 217, 0.045) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(152, 193, 217, 0.045) 1px, transparent 1px);
+		background-size: 8px 8px;
+		transition: background-color 0.2s ease-out;
+	}
+
+	.gauge:hover {
+		background-color: rgba(61, 90, 128, 0.25);
+	}
+
+	.gauge-head {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
+		color: #98c1d9;
+	}
+
+	.battery {
+		width: 100%;
+		height: auto;
+	}
+
+	.shell {
+		fill: none;
+		stroke: #98c1d9;
+		stroke-width: 2;
+	}
+
+	.cap {
+		fill: #98c1d9;
+	}
+
+	.cell {
+		fill: rgba(152, 193, 217, 0.12);
+	}
+
+	.cell.on {
+		fill: #f28b72;
+		fill-opacity: 1;
+	}
+
+	.cell.tip {
+		fill-opacity: calc(0.35 + var(--part) * 0.65);
+	}
+
+	.battery.charging .cell.tip {
+		animation: cell-breathe 1.6s ease-in-out infinite;
+	}
+
+	@keyframes cell-breathe {
+		50% {
+			fill-opacity: 0.25;
+		}
+	}
+
+	.gauge-read {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 0.25rem 1rem;
+	}
+
+	.gauge-big {
+		font-size: 2.75rem;
+		line-height: 1;
+		color: #e0fbfc;
+	}
+
+	.gauge-big small {
+		margin-left: 0.15rem;
+		font-size: 1.25rem;
+		color: #98c1d9;
+	}
+
+	.gauge-side {
+		font-size: 0.875rem;
+		color: #98c1d9;
+	}
+
+	.gauge-tea {
+		display: flex;
+		flex-direction: column;
+		gap: 0.375rem;
+		font-size: 0.875rem;
+		line-height: 1.25rem;
+		color: #98c1d9;
+	}
+
+	.cups {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem;
+	}
+
+	.cup {
+		width: 1.5rem;
+		height: 1.5rem;
+		fill: none;
+		stroke: #e0fbfc;
+		stroke-width: 1.5;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+	}
+
+	.cup .steam {
+		stroke: #f28b72;
+		animation: steam 2.4s ease-in-out infinite;
+		animation-delay: calc(var(--i) * 0.3s);
+	}
+
+	@keyframes steam {
+		0%,
+		100% {
+			opacity: 0.2;
+			transform: translateY(1px);
+		}
+		50% {
+			opacity: 1;
+			transform: translateY(-1px);
+		}
+	}
+
+	.gauge-foot {
+		margin-top: auto;
+		padding-top: 0.75rem;
+		border-top: 1px solid rgba(152, 193, 217, 0.3);
+		font-size: 0.875rem;
+		line-height: 1.25rem;
+		color: #98c1d9;
+		min-height: 2.25rem;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.battery.charging .cell.tip,
+		.cup .steam {
+			animation: none;
+		}
+
+		.hero-link,
+		.gauge {
+			transition: none;
+		}
+	}
+</style>

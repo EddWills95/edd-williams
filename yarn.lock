@@ -91,6 +91,11 @@
     "@eslint/core" "^0.17.0"
     levn "^0.4.1"
 
+"@fontsource/ibm-plex-mono@^5.3.0":
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/@fontsource/ibm-plex-mono/-/ibm-plex-mono-5.3.0.tgz#1879699d104602d5331e28e103f33c3b1b766b17"
+  integrity sha512-eTgnZjZEGk1QtD3ZstF+Vclo2HLAni8YMy34/DxllwZvyz1lR/1RF/xTiAquOBO7MvqBx8D2Ig2WCPMVfdZu7Q==
+
 "@fontsource/raleway@^5.3.0":
   version "5.3.0"
   resolved "https://registry.yarnpkg.com/@fontsource/raleway/-/raleway-5.3.0.tgz#b7f4e46c67c0930e031d8968b6827bc883180ca4"

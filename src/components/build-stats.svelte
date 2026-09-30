@@ -1,5 +1,7 @@
 <script>
 	import { onMount, onDestroy } from 'svelte';
+	import { tweened } from 'svelte/motion';
+	import { quartOut } from 'svelte/easing';
 	import { buildStats } from '$lib/live-stats.js';
 
 	// Its own section: what the person living in the flat has been building. Uses its own
@@ -94,16 +96,59 @@
 	});
 
 	$: asOf = stats ? new Date(stats.asOf) : null;
+
+	// Today's figures count up from zero the first time the sheet scrolls into view. Until then
+	// (and under reduced motion, or with no JS) they simply show the real number.
+	let sheet;
+	let seen = false;
+	let reduced = false;
+	const written = tweened(0, { easing: quartOut });
+	const added = tweened(0, { easing: quartOut });
+	const commits = tweened(0, { easing: quartOut });
+
+	onMount(() => {
+		reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	});
+
+	$: if (sheet && !seen && !reduced) {
+		const io = new IntersectionObserver(
+			([entry]) => {
+				if (!entry.isIntersecting) return;
+				seen = true;
+				io.disconnect();
+			},
+			{ threshold: 0.35 }
+		);
+		io.observe(sheet);
+	}
+
+	$: animate = seen && !reduced;
+	$: if (stats) {
+		const duration = animate ? 1600 : 0;
+		written.set(animate ? stats.today.written : 0, { duration: animate ? duration : 0 });
+		added.set(animate ? stats.today.linesAdded : 0, { duration: animate ? duration : 0 });
+		commits.set(animate ? stats.today.commits : 0, { duration: animate ? 1000 : 0 });
+	}
+	$: shown = {
+		written: reduced || !sheet || !seen ? stats?.today.written : Math.round($written),
+		added: reduced || !sheet || !seen ? stats?.today.linesAdded : Math.round($added),
+		commits: reduced || !sheet || !seen ? stats?.today.commits : Math.round($commits)
+	};
 </script>
 
 <!-- The anchor is always present so links to #build exist at prerender time; the section only
      appears once real data has loaded. -->
 <span class="anchor" id="build"></span>
 {#if stats}
-	<section class="base-section justify-start">
-		<h2 class="text-2xl mb-4">Build</h2>
+	<section class="base-section build-section justify-start" aria-labelledby="build-section-heading">
+		<h2 id="build-section-heading" class="section-title">Build</h2>
 
-		<aside class="build-sheet" aria-labelledby="build-heading">
+		<p class="mt-2 max-w-prose text-light-cyan text-base">
+			The other half of what I do: what's been going on at the laptop today, counted from my own
+			Claude Code usage and git.
+		</p>
+
+		<div class="build-sheet" bind:this={sheet}>
 			{#if mocked}
 				<p class="mock-flag">Mock data: dev fixture, not real numbers</p>
 			{/if}
@@ -131,24 +176,26 @@
 			<dl class="stats">
 				<div class="stat">
 					<dt class="label">Tokens written</dt>
-					<dd class="today nums">{count(stats.today.written)} <span class="unit">today</span></dd>
-					<dd class="lifetime nums">{big(stats.lifetime.written)} all time</dd>
+					<dd class="today nums">{count(shown.written)} <span class="unit">today</span></dd>
+					<dd class="lifetime"><span class="nums">{big(stats.lifetime.written)}</span> all time</dd>
 					<dd class="caption">{tokenCaption(stats.today.written)}</dd>
 				</div>
 
 				<div class="stat">
 					<dt class="label">Lines added</dt>
 					<dd class="today nums">
-						{count(stats.today.linesAdded)} <span class="unit">today</span>
+						{count(shown.added)} <span class="unit">today</span>
 					</dd>
-					<dd class="lifetime nums">{big(stats.lifetime.linesAdded)} all time</dd>
+					<dd class="lifetime">
+						<span class="nums">{big(stats.lifetime.linesAdded)}</span> all time
+					</dd>
 					<dd class="caption">{linesCaption(stats.today)}</dd>
 				</div>
 
 				<div class="stat">
 					<dt class="label">Commits</dt>
-					<dd class="today nums">{count(stats.today.commits)} <span class="unit">today</span></dd>
-					<dd class="lifetime nums">{big(stats.lifetime.commits)} all time</dd>
+					<dd class="today nums">{count(shown.commits)} <span class="unit">today</span></dd>
+					<dd class="lifetime"><span class="nums">{big(stats.lifetime.commits)}</span> all time</dd>
 					<dd class="caption">{commitsCaption(stats.today)}</dd>
 				</div>
 			</dl>
@@ -173,18 +220,19 @@
 					Rings at about {count(LOTR_WORDS)}.
 				</p>
 			</div>
-		</aside>
+		</div>
 	</section>
 
 	<hr class="section-break" />
 {/if}
 
 <style>
-	/* Plain CSS (no @apply), matching the flat drawing's sheet in home-lab.svelte. */
+	/* Plain CSS (no @apply), matching the flat drawing's sheet in balcony-solar.svelte. */
 	.build-sheet {
+		width: 100%;
 		position: relative;
 		max-width: 40rem;
-		margin: 1.5rem auto 0;
+		margin: 1rem auto 0;
 		border: 2px solid rgba(152, 193, 217, 0.6);
 		border-radius: 2px;
 		background-image:
@@ -205,6 +253,7 @@
 	}
 
 	.nums {
+		font-family: 'IBM Plex Mono', ui-monospace, monospace;
 		font-variant-numeric: lining-nums tabular-nums;
 	}
 
@@ -219,7 +268,8 @@
 	}
 
 	.build-title {
-		font-size: 1.25rem;
+		font-size: 1.5rem;
+		font-weight: 500;
 		line-height: 1.3;
 		color: #e0fbfc;
 	}
@@ -233,8 +283,8 @@
 	}
 
 	.synced {
-		font-size: 0.75rem;
-		line-height: 1rem;
+		font-size: 0.875rem;
+		line-height: 1.25rem;
 		color: #98c1d9;
 	}
 
@@ -265,8 +315,8 @@
 	}
 
 	.label {
-		font-size: 0.75rem;
-		line-height: 1rem;
+		font-size: 0.875rem;
+		line-height: 1.25rem;
 		font-weight: 500;
 		letter-spacing: 0.05em;
 		text-transform: uppercase;
@@ -316,9 +366,16 @@
 	}
 
 	.footnote {
-		font-size: 0.75rem;
-		line-height: 1rem;
+		font-size: 0.875rem;
+		line-height: 1.25rem;
 		color: #98c1d9;
+	}
+
+	@media (min-width: 1280px) {
+		.build-sheet {
+			max-width: none;
+			align-self: start;
+		}
 	}
 
 	@media (min-width: 640px) {

@@ -1,6 +1,6 @@
-// DEV-ONLY fixtures for designing the Home Lab section locally, where CORS blocks the live
+// DEV-ONLY fixtures for designing the Balcony Solar section locally, where CORS blocks the live
 // endpoint. Only ever imported behind `import.meta.env.DEV` plus an explicit `?mock=` opt-in in
-// home-lab.svelte, so none of this reaches a production build. These are NOT real readings.
+// balcony-solar.svelte, so none of this reaches a production build. These are NOT real readings.
 //
 //   ?mock=1       every field, battery discharging in the evening
 //   ?mock=sunny   solar exporting to the grid while the battery charges
@@ -104,4 +104,72 @@ const buildVariants = {
 export function mockBuildStats(variant) {
 	if (variant === 'none') return Promise.reject(new Error('mock: 404, no build stats yet'));
 	return Promise.resolve((buildVariants[variant] ?? buildVariants.normal)());
+}
+
+// History fixtures for the day-in-the-life strip, selected with `?mockhistory=<variant>` (or any
+// `?mock=`, which uses `normal`). DEV-ONLY, invented, and simulated from a simple battery model
+// so the four series stay consistent with each other the way real ones do.
+//
+//   ?mockhistory=normal  a sunny-ish day: solar peak, evening discharge, a few kettle spikes
+//   ?mockhistory=none    request fails (strip hidden)
+
+function simulateDay() {
+	const bucketMs = 15 * 60_000;
+	const end = Math.ceil(Date.now() / bucketMs) * bucketMs;
+	const n = 96;
+	const start = end - n * bucketMs;
+	const solarW = [];
+	const houseW = [];
+	const gridW = [];
+	const batterySoc = [];
+	const batteryW = [];
+	const capacityWh = 5000;
+	let soc = 34;
+	for (let i = 0; i < n; i++) {
+		const d = new Date(start + i * bucketMs);
+		const hour = d.getHours() + d.getMinutes() / 60;
+		const sun = Math.max(0, Math.sin(((hour - 6) / 13) * Math.PI));
+		const cloud = 0.75 + 0.25 * Math.sin(i * 1.7) * Math.cos(i * 0.6);
+		const solar = Math.round(sun * 2150 * cloud);
+		let house = 260 + 60 * Math.sin(i * 0.9);
+		if (hour > 6.5 && hour < 8.5) house += 380;
+		if (hour > 17.5 && hour < 21.5) house += 520;
+		if (i % 23 === 5 || i % 31 === 11) house += 2100; // the kettle
+		house = Math.round(house);
+
+		const net = solar - house;
+		let grid;
+		let battery; // positive discharging, negative charging
+		if (net >= 0) {
+			const charge = Math.min(net, 2000, ((100 - soc) / 100) * capacityWh * 4);
+			soc += (charge * 0.25 * 100) / capacityWh;
+			grid = -(net - charge);
+			battery = -charge;
+		} else {
+			const discharge = Math.min(-net, 2000, (soc / 100) * capacityWh * 4);
+			soc -= (discharge * 0.25 * 100) / capacityWh;
+			grid = -net - discharge;
+			battery = discharge;
+		}
+		solarW.push(solar);
+		houseW.push(house);
+		gridW.push(Math.round(grid));
+		batteryW.push(Math.round(battery));
+		batterySoc.push(Number(Math.min(100, Math.max(0, soc)).toFixed(1)));
+	}
+	return {
+		start: new Date(start).toISOString(),
+		intervalMinutes: 15,
+		solarW,
+		houseW,
+		gridW,
+		batteryW,
+		batterySoc,
+		asOf: new Date().toISOString()
+	};
+}
+
+export function mockHistory(variant) {
+	if (variant === 'none') return Promise.reject(new Error('mock: history unavailable'));
+	return Promise.resolve(simulateDay());
 }
