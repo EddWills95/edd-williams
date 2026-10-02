@@ -88,10 +88,8 @@ sensors already published above: battery charge and battery power, plus solar, h
 power when their `HA_ENTITY_*` variables are set (each series is omitted when its entity isn't
 configured).
 
-`batteryW` is signed: positive while discharging, negative while charging. The battery power
-sensor only reports a magnitude, so the direction comes from the battery action sensor; while the
-action is `HOLD` it falls back to the power balance (house − solar − grid), and is `null` for that
-bucket if any of those three is missing.
+`batteryW` is signed, as the battery power sensor reports it: positive while discharging, negative
+while charging.
 
 ```json
 {

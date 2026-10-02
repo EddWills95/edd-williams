@@ -35,8 +35,7 @@ const ENTITIES = {
 	solarGenerationTotalKwh: 'sensor.stream_ac_pro_0388_solar_generation_energy',
 	solarGenerationTodayKwh: 'sensor.stream_ac_pro_0388_solar_generation_today',
 	batterySoc: 'sensor.combined_battery_soc',
-	batteryPowerW: 'sensor.combined_battery_power',
-	batteryAction: 'sensor.battery_action'
+	batteryPowerW: 'sensor.combined_battery_power'
 };
 
 const cacheTtlMs = Number(CACHE_TTL_SECONDS) * 1000;
@@ -144,7 +143,6 @@ async function fetchHistory() {
 	const roles = {
 		soc: ENTITIES.batterySoc,
 		batteryPower: ENTITIES.batteryPowerW,
-		batteryAction: ENTITIES.batteryAction,
 		solar: OPTIONAL_ENTITIES.solarPowerW,
 		house: OPTIONAL_ENTITIES.housePowerW,
 		grid: OPTIONAL_ENTITIES.gridPowerW

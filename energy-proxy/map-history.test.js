@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { bucketSeries, bucketCategory, mapHistory } from './map-history.js';
+import { bucketSeries, mapHistory } from './map-history.js';
 
 const T0 = Date.parse('2026-09-30T00:00:00Z');
 const MIN = 60_000;
@@ -53,43 +53,14 @@ test('unconfigured series are omitted', () => {
 	assert.equal('gridW' in result, false);
 });
 
-test('categorical buckets take the state held longest', () => {
-	assert.deepEqual(
-		bucketCategory([at(-30, 'CHARGE'), at(10, 'DISCHARGE')], window),
-		['CHARGE', 'DISCHARGE', 'DISCHARGE', 'DISCHARGE']
-	);
-});
-
-test('battery power is signed by the action sensor', () => {
+test('battery power keeps the sign the sensor reports', () => {
 	const now = new Date(T0 + 60 * MIN);
 	const day = -1440;
 	const result = mapHistory(
-		{
-			soc: [at(day, 50)],
-			batteryPower: [at(day, 400)],
-			batteryAction: [at(day, 'DISCHARGE'), at(-30, 'CHARGE')]
-		},
+		{ soc: [at(day, 50)], batteryPower: [at(day, 400), at(-30, -250)] },
 		{ now }
 	);
 	assert.equal(result.batteryW[0], 400);
-	assert.equal(result.batteryW[95], -400);
-});
-
-test('while holding, direction falls back to the power balance, and is omitted without it', () => {
-	const now = new Date(T0 + 60 * MIN);
-	const day = -1440;
-	const base = { soc: [at(day, 50)], batteryPower: [at(day, 300)], batteryAction: [at(day, 'HOLD')] };
-	// house 500, solar 0, grid 200 -> battery covers 300 (discharging)
-	const known = mapHistory(
-		{ ...base, house: [at(day, 500)], solar: [at(day, 0)], grid: [at(day, 200)] },
-		{ now }
-	);
-	assert.equal(known.batteryW[0], 300);
-	// solar 900 vs house 500, grid 0 -> surplus of 400 goes into the battery (charging)
-	const charging = mapHistory(
-		{ ...base, house: [at(day, 500)], solar: [at(day, 900)], grid: [at(day, 0)] },
-		{ now }
-	);
-	assert.equal(charging.batteryW[0], -300);
-	assert.equal(mapHistory(base, { now }).batteryW[0], null);
+	assert.equal(result.batteryW[95], -250);
+	assert.equal('batteryW' in mapHistory({ soc: [at(day, 50)] }, { now }), false);
 });

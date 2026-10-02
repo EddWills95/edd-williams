@@ -2,18 +2,17 @@
 // from server.js (which exits without HA credentials and starts listening on import) so the
 // mapping can be exercised on its own with fixture states.
 
-// Home Assistant reports this as a bare verb (DISCHARGE / CHARGE / IDLE); the UI wants the
-// gerund form ("Discharging · 401W"). Explicit map rather than string-mangling since it's a
-// small fixed set and a silent guess would be wrong for anything unexpected (e.g. IDLE).
-const BATTERY_ACTION_LABELS = {
-	DISCHARGE: 'Discharging',
-	CHARGE: 'Charging',
-	IDLE: 'Idle',
-	HOLD: 'Holding'
-};
+// Below this, battery power is treated as noise rather than the battery actually moving.
+const MOVING_THRESHOLD_W = 25;
 
-export function batteryActionLabel(value) {
-	return BATTERY_ACTION_LABELS[value] ?? value ?? null;
+// sensor.combined_battery_power is signed (positive = discharging, negative = charging), so what
+// the battery is doing comes from the power itself. The tariff-planning "battery action" sensor
+// says what the battery is meant to do, not what it is doing, so it is not used.
+export function batteryActionFor(watts) {
+	if (!Number.isFinite(watts)) return null;
+	if (watts > MOVING_THRESHOLD_W) return 'Discharging';
+	if (watts < -MOVING_THRESHOLD_W) return 'Charging';
+	return 'Holding';
 }
 
 // HA uses these literal strings when a sensor has no reading; they must never be published as
@@ -62,7 +61,7 @@ export function mapStats(required, optional = {}, options = {}) {
 		solarGenerationTodayKwh: Number(Number(raw('solarGenerationTodayKwh')).toFixed(2)),
 		batterySoc: Number(Number(raw('batterySoc')).toFixed(1)),
 		batteryPowerW: Math.round(Number(raw('batteryPowerW'))),
-		batteryAction: batteryActionLabel(raw('batteryAction')),
+		batteryAction: batteryActionFor(Math.round(Number(raw('batteryPowerW')))),
 		asOf: (options.now ?? new Date()).toISOString()
 	};
 
