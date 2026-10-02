@@ -146,8 +146,10 @@
 		<h2 id="build-section-heading" class="section-title">Code</h2>
 
 		<p class="mt-2 max-w-prose text-light-cyan text-base">
-			The other half of what I do: what's been going on at the laptop today, counted from my own
-			Claude Code usage and git.
+			My day job: what's been going on at the laptop today, counted from my own Claude Code usage
+			and git. AI has changed everything about my job and it's given untold power to create. While
+			there's a slight resentment in showing my claude stats, it is the new reality and I am
+			undeniably more productive
 		</p>
 
 		<div class="build-sheet" bind:this={sheet}>
