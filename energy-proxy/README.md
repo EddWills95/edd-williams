@@ -39,7 +39,7 @@ must treat them as possibly absent.
 | `housePowerW`         | House consumption right now, W                                  | `HA_ENTITY_HOUSE_POWER`   |
 | `gridPowerW`          | Grid power right now, W — positive importing, negative exporting | `HA_ENTITY_GRID_POWER`    |
 | `batterySavingsToday` | Battery-system savings today, £                                 | `HA_ENTITY_SAVINGS_TODAY` |
-| `kettleCupsToday`     | Estimated cups of tea today (kettle kWh ÷ kWh per cup)          | `HA_ENTITY_KETTLE_CUPS`   |
+| `kettleCupsToday`     | Cups of tea today: one per kettle boil                          | `HA_ENTITY_KETTLE_CUPS`   |
 | `kettleBoilsToday`    | Kettle boils today (power spikes above 1 kW)                    | `HA_ENTITY_KETTLE_BOILS`  |
 
 Power sensors reporting in `kW` are converted to W. The savings sensor is read as pence unless
