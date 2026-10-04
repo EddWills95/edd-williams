@@ -44,7 +44,7 @@
 
 <section
 	id="banner"
-	class="relative w-full min-h-[calc(100svh-4rem)] mt-16 flex flex-col items-center justify-center"
+	class="relative w-full min-h-[calc(100svh-4rem)] mt-16 pb-24 flex flex-col items-center justify-center"
 	aria-labelledby="banner-heading"
 >
 	<div
