@@ -1,16 +1,18 @@
 #!/usr/bin/env node
 // Build-stats job: sums Claude Code tokens and git lines/commits per day on this Mac and POSTs
 // the aggregates to the energy proxy. Only per-day totals leave the machine: no repo names, paths,
-// commit messages or file names. Run by launchd hourly; see README.md.
+// commit messages or file names. It also sends the PokeTokenBar partner (name, level, XP, shiny
+// flag and sprite, nothing else). Run by launchd hourly; see README.md.
 //
 //   node job.js [--dry-run] [--days N]
-import { createReadStream, readdirSync } from 'node:fs';
+import { createReadStream, readdirSync, readFileSync } from 'node:fs';
 import { createInterface } from 'node:readline';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import {
 	GIT_LOG_FORMAT,
+	buildPartner,
 	chunk,
 	commitsByDay,
 	createTokenCollector,
@@ -18,6 +20,7 @@ import {
 	mergeDays,
 	parseGitLog,
 	shiftDay,
+	spriteKey,
 	totals
 } from './collect.js';
 
@@ -40,6 +43,11 @@ const CONFIG = {
 		.filter(Boolean),
 	extraEmails: ['edd.williams@me.com', ...(env('BUILD_STATS_EMAILS') ?? '').split(',')],
 	keychainService: 'build-stats-token',
+	// PokeTokenBar's data, read-only. BUILD_STATS_PARTNER=off skips the partner entirely.
+	partnerDir:
+		env('BUILD_STATS_POKETOKENBAR_DIR') ??
+		join(HOME, 'Library', 'Application Support', 'PokeTokenBar'),
+	partnerEnabled: env('BUILD_STATS_PARTNER') !== 'off',
 	maxDepth: 4, // ~/Development/a/b/c/repo at most
 	daysPerPost: 200, // the proxy accepts up to 400 days and 64 KB per POST
 	attempts: 4
@@ -159,19 +167,42 @@ function readToken() {
 	return token;
 }
 
+// The current partner and its sprite, or null if PokeTokenBar isn't installed, is showing an egg
+// or has files in a shape we don't know. Never throws: the partner is a garnish on the stats job.
+function readPartner() {
+	if (!CONFIG.partnerEnabled) return null;
+	try {
+		const dir = CONFIG.partnerDir;
+		const state = JSON.parse(readFileSync(join(dir, 'companion-state.json'), 'utf8'));
+		const speciesId = state?.active?.pathIDs?.[state?.active?.stageIndex];
+		const details = JSON.parse(
+			readFileSync(join(dir, 'pokemon-details-v1', `${speciesId}.json`), 'utf8')
+		);
+		const partner = buildPartner(state, details);
+		if (!partner) return null;
+		return { partner, spritePath: join(dir, 'sprites', `${spriteKey(partner)}.gif`) };
+	} catch (err) {
+		console.error(`${new Date().toISOString()} build-stats: no partner: ${err.message}`);
+		return null;
+	}
+}
+
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function post(body, token) {
+async function post(body, token, { url = CONFIG.url, method = 'POST', json = true } = {}) {
 	let lastError;
 	for (let attempt = 1; attempt <= CONFIG.attempts; attempt++) {
 		try {
-			const res = await fetch(CONFIG.url, {
-				method: 'POST',
-				headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-				body: JSON.stringify(body),
+			const res = await fetch(url, {
+				method,
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': json ? 'application/json' : 'image/gif'
+				},
+				body: json ? JSON.stringify(body) : body,
 				signal: AbortSignal.timeout(30_000)
 			});
-			if (res.ok) return;
+			if (res.ok) return json ? await res.json().catch(() => ({})) : undefined;
 			const detail = await res.text().catch(() => '');
 			lastError = new Error(`HTTP ${res.status} ${detail.slice(0, 200)}`.trim());
 			// Client errors (bad token, bad body) won't fix themselves on retry.
@@ -199,13 +230,24 @@ async function main() {
 	const days = mergeDays([tokens.days, lines.days], { sinceDay }).filter((d) => d.day <= today);
 	const sums = totals(days, today);
 	const asOf = now.toISOString();
+	const partner = readPartner();
 
 	if (args.dryRun) {
-		const report = { asOf, today, days: days.length, totals: sums, payload: { asOf, days } };
+		const report = {
+			asOf,
+			today,
+			days: days.length,
+			totals: sums,
+			payload: { asOf, days },
+			partner: partner && {
+				payload: { asOf, partner: partner.partner },
+				sprite: partner.spritePath
+			}
+		};
 		process.stdout.write(`${JSON.stringify(report, null, '\t')}\n`);
 		return;
 	}
-	if (days.length === 0) {
+	if (days.length === 0 && !partner) {
 		console.log(`${asOf} build-stats: nothing to send`);
 		return;
 	}
@@ -213,6 +255,7 @@ async function main() {
 	const token = readToken();
 	const batches = chunk(days, CONFIG.daysPerPost);
 	for (const batch of batches) await post({ asOf, days: batch }, token);
+	const partnerNote = partner ? await sendPartner(partner, asOf, token) : 'no partner';
 
 	const t = sums.today;
 	console.log(
@@ -220,9 +263,35 @@ async function main() {
 			`${new URL(CONFIG.url).host} in ${((Date.now() - started) / 1000).toFixed(1)}s; ` +
 			`today written=${t.written} cacheRead=${t.cacheRead} linesAdded=${t.linesAdded} ` +
 			`commits=${t.commits}; ${tokens.files} logs, ${lines.repos} repos` +
-			(lines.failed ? ` (${lines.failed} unreadable)` : '')
+			(lines.failed ? ` (${lines.failed} unreadable)` : '') +
+			`; ${partnerNote}`
 	);
 }
+
+// A partner failure is logged but never fails the job: the day totals above are already sent.
+// The proxy says whether it still needs the sprite, so the gif only travels when the species or
+// shiny flag changes (and again if the proxy lost it).
+async function sendPartner({ partner, spritePath }, asOf, token) {
+	const label = `${partner.name} Lv ${partner.level}${partner.shiny ? ' (shiny)' : ''}`;
+	try {
+		const result = await post({ asOf, partner }, token, { url: partnerUrl('/api/partner') });
+		if (!result?.needsSprite) return `partner ${label}`;
+		const gif = readFileSync(spritePath);
+		const key = encodeURIComponent(spriteKey(partner));
+		await post(gif, token, {
+			url: partnerUrl(`/api/partner/sprite?key=${key}`),
+			method: 'PUT',
+			json: false
+		});
+		return `partner ${label} + sprite (${gif.length} bytes)`;
+	} catch (err) {
+		console.error(`${new Date().toISOString()} build-stats: partner failed: ${err.message}`);
+		return 'partner failed';
+	}
+}
+
+// The partner routes sit next to the build-stats one: same host, same token.
+const partnerUrl = (path) => new URL(path, CONFIG.url).toString();
 
 main().catch((err) => {
 	console.error(`${new Date().toISOString()} build-stats: failed: ${err.message}`);

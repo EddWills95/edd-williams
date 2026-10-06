@@ -160,3 +160,62 @@ on every redeploy. Each column of each day only ever grows (`max()` per column),
 safe. Columns added after the first deploy are added to an existing database on startup
 (`ALTER TABLE ... ADD COLUMN ... DEFAULT 0`, skipped when already present). Requires Node 22+
 (`node:sqlite`). Run tests with `yarn test` (or `node --test build-stats.test.js`).
+
+## Partner
+
+The PokeTokenBar partner: the Pokémon whose level rises with the tokens I spend. Sent by the same
+Mac job and bearer token (`BUILD_STATS_TOKEN`), stored in the same SQLite file (tables `partner`
+and `partner_sprite`), and only enabled when build stats are. Code is in `partner.js`, tested by
+`partner.test.js`.
+
+`POST /api/partner` (bearer) replaces the stored partner:
+
+```json
+{
+	"asOf": "2026-10-06T12:29:00.000Z",
+	"partner": {
+		"speciesId": 15,
+		"name": "beedrill",
+		"level": 54,
+		"xp": 389103472,
+		"shiny": false,
+		"levelStartXp": 386842106,
+		"nextLevelXp": 394736843
+	}
+}
+```
+
+`levelStartXp` and `nextLevelXp` are optional (no bar without them; `nextLevelXp` is omitted at
+level 100). Unknown fields are dropped. The reply is `{ "ok": true, "applied": true,
+"needsSprite": true }`: `needsSprite` is true until a GIF is stored for this species and shiny
+flag.
+
+`PUT /api/partner/sprite?key=15-a` (bearer, `Content-Type: image/gif`, at most 512 KB) stores the
+GIF. `key` is `<speciesId>-a` or `<speciesId>-sha` (shiny) and must match the current partner
+(409 otherwise), so a stale upload can't leave a sprite nothing shows. Only the current sprite is
+kept. The Mac only sends it when `needsSprite` is true. A GIF is a separate request rather than
+base64 in the JSON because that keeps the JSON tiny and the image cacheable.
+
+`GET /api/partner` serves the partner (404 until the first push):
+
+```json
+{
+	"asOf": "2026-10-06T12:29:47.677Z",
+	"stale": false,
+	"speciesId": 15,
+	"name": "beedrill",
+	"level": 54,
+	"xp": 389103472,
+	"shiny": false,
+	"levelStartXp": 386842106,
+	"nextLevelXp": 394736843,
+	"spriteUrl": "/api/partner/sprite?v=15-a"
+}
+```
+
+`spriteUrl` is `null` until the GIF has been uploaded. `GET /api/partner/sprite` serves the GIF
+with a long cache lifetime; the `v` key changes with the species or shiny flag.
+
+Unlike the build-stats counters this is **not** max-merged: a partner swap or an evolution can
+lower the level, so the newest push replaces the record. The only guard is ordering: a push whose
+`asOf` is older than the stored one is ignored (`applied: false`).

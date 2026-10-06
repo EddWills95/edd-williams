@@ -21,6 +21,10 @@ async function devMock(name) {
 		const variant = params.get('mockhistory') ?? (params.has('mock') ? 'normal' : null);
 		return variant ? fixtures.mockHistory(variant) : null;
 	}
+	if (name === 'partner') {
+		const variant = params.get('mockpartner') ?? (params.has('mock') ? 'normal' : null);
+		return variant ? fixtures.mockPartner(variant) : null;
+	}
 	const variant = params.get('mockbuild') ?? (params.has('mock') ? 'normal' : null);
 	return variant ? fixtures.mockBuildStats(variant) : null;
 }
@@ -105,3 +109,8 @@ function poller(name, path, intervalMs) {
 export const energyStats = poller('energy', '/api/energy-stats', 75_000);
 export const energyHistory = poller('history', '/api/energy-history', 10 * 60_000);
 export const buildStats = poller('build', '/api/build-stats', 5 * 60_000);
+export const partnerStats = poller('partner', '/api/partner', 5 * 60_000);
+
+// The partner's sprite is served by the same API; the payload gives a path (or, in dev mocks, a
+// full URL).
+export const apiUrl = (path) => (/^https?:\/\//.test(path) ? path : `${BASE}${path}`);

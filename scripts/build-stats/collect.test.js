@@ -3,13 +3,16 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
 	chunk,
+	buildPartner,
 	commitsByDay,
 	createTokenCollector,
 	isNoisePath,
 	mergeDays,
 	parseGitLog,
 	resolveRenamedPath,
-	totals
+	spriteKey,
+	totals,
+	xpForLevel
 } from './collect.js';
 
 const fixture = (name) => readFileSync(new URL(`./fixtures/${name}`, import.meta.url), 'utf8');
@@ -165,4 +168,97 @@ test('totals and chunk', () => {
 	assert.equal(t.lifetime.linesAdded, 22);
 	assert.equal(t.lifetime.commits, 3);
 	assert.deepEqual(chunk([1, 2, 3, 4, 5], 2), [[1, 2], [3, 4], [5]]);
+});
+
+const companionState = (patch = {}, profilePatch = {}) => ({
+	active: {
+		pathIDs: [13, 14, 15],
+		stageIndex: 2,
+		isShiny: false,
+		rarity: 'common',
+		nature: 'impish',
+		usedAtStage: 8717301,
+		profile: {
+			level: 53,
+			growthTokens: 383_717_301,
+			seed: 123456789,
+			instanceID: 'B89C00B7-8AF9-4DB5-859C-8CB48E004944',
+			ivs: { hp: 29 },
+			moves: [{ name: 'agility', learnedAtLevel: 31 }],
+			...profilePatch
+		},
+		...patch
+	}
+});
+const beedrill = { details: { name: 'beedrill', speciesID: 15 } };
+
+test('partner: level curve matches the app (known data points)', () => {
+	// level = 5 + floor(95 * tokens / 750M) for a common; both the user's earlier and current reading.
+	for (const tokens of [382_775_174, 383_717_301]) {
+		const level = buildPartner(companionState({}, { growthTokens: tokens }), beedrill).level;
+		assert.equal(5 + Math.floor((95 * tokens) / 750_000_000), level);
+	}
+	assert.equal(xpForLevel(100, 'common'), 750_000_000);
+	assert.equal(xpForLevel(5, 'common'), 0);
+	assert.equal(xpForLevel(100, 'legendary'), 6_000_000_000);
+	assert.equal(xpForLevel(53, 'unheard-of'), undefined);
+});
+
+test('partner: thresholds bracket the current tokens', () => {
+	const partner = buildPartner(companionState(), beedrill);
+	assert.equal(partner.levelStartXp, 378_947_369);
+	assert.equal(partner.nextLevelXp, 386_842_106);
+	assert.ok(partner.levelStartXp <= partner.xp && partner.xp < partner.nextLevelXp);
+	// The boundary token itself is the first of the next level.
+	assert.equal(5 + Math.floor((95 * partner.nextLevelXp) / 750_000_000), 54);
+	assert.equal(5 + Math.floor((95 * (partner.nextLevelXp - 1)) / 750_000_000), 53);
+});
+
+test('partner: sends only the whitelisted fields', () => {
+	const partner = buildPartner(companionState(), beedrill);
+	assert.deepEqual(
+		Object.keys(partner).sort(),
+		['levelStartXp', 'level', 'name', 'nextLevelXp', 'shiny', 'speciesId', 'xp'].sort()
+	);
+	const text = JSON.stringify(partner);
+	for (const secret of ['seed', 'instanceID', 'ivs', 'B89C00B7', 'impish', 'agility']) {
+		assert.equal(text.includes(secret), false);
+	}
+});
+
+test('partner: species comes from pathIDs[stageIndex]; shiny only when exactly true', () => {
+	assert.equal(buildPartner(companionState({ stageIndex: 0 }), beedrill).speciesId, 13);
+	assert.equal(buildPartner(companionState({ isShiny: true }), beedrill).shiny, true);
+	assert.equal(buildPartner(companionState({ isShiny: 'yes' }), beedrill).shiny, false);
+	assert.equal(spriteKey({ speciesId: 15, shiny: false }), '15-a');
+	assert.equal(spriteKey({ speciesId: 15, shiny: true }), '15-sha');
+});
+
+test('partner: level 100 has no next level; unknown rarity has no thresholds', () => {
+	const maxed = buildPartner(
+		companionState({}, { level: 100, growthTokens: 750_000_000 }),
+		beedrill
+	);
+	assert.equal(maxed.nextLevelXp, undefined);
+	assert.equal(maxed.levelStartXp, 750_000_000);
+	const odd = buildPartner(companionState({ rarity: 'mythic' }), beedrill);
+	assert.equal(odd.levelStartXp, undefined);
+	assert.equal(odd.nextLevelXp, undefined);
+	assert.equal(odd.xp, 383_717_301);
+});
+
+test('partner: null for an egg, bad names and malformed state', () => {
+	const bad = [
+		[null, beedrill],
+		[{}, beedrill],
+		[companionState({ stageIndex: 9 }), beedrill],
+		[companionState({ profile: undefined }), beedrill],
+		[companionState({}, { level: 3 }), beedrill],
+		[companionState({}, { level: 101 }), beedrill],
+		[companionState({}, { growthTokens: -1 }), beedrill],
+		[companionState({}, { growthTokens: 1.5 }), beedrill],
+		[companionState(), null],
+		[companionState(), { details: { name: 'Bee Drill!' } }]
+	];
+	for (const [state, details] of bad) assert.equal(buildPartner(state, details), null);
 });

@@ -3,6 +3,7 @@ import cors from 'cors';
 import { mapStats } from './map-stats.js';
 import { mapHistory } from './map-history.js';
 import { openBuildStats, tokenMatches, validateSnapshot } from './build-stats.js';
+import { MAX_SPRITE_LIMIT, isGif, openPartner, validatePartner } from './partner.js';
 
 // PaaS env-var UIs routinely round-trip pasted values with a trailing newline or stray
 // whitespace — trim each one so a copy-paste artifact doesn't silently break auth or
@@ -186,9 +187,11 @@ async function getHistory() {
 // Build stats are optional: if the token isn't set or the database can't be opened, the
 // energy endpoint carries on and only the build routes report unavailable.
 let buildStats = null;
+let partner = null; // the PokeTokenBar partner shares the build-stats database and token
 if (BUILD_STATS_TOKEN) {
 	try {
 		buildStats = openBuildStats(BUILD_STATS_DB, { timeZone: BUILD_STATS_TZ });
+		partner = openPartner(BUILD_STATS_DB);
 		console.log(`Build stats enabled, database at ${BUILD_STATS_DB}`);
 	} catch (err) {
 		console.error(`Build stats disabled, could not open ${BUILD_STATS_DB}:`, err.message);
@@ -255,6 +258,67 @@ app.post('/api/build-stats', express.json({ limit: '64kb' }), (req, res) => {
 		res.status(500).json({ error: 'Failed to store build stats' });
 	}
 });
+
+function authorised(req) {
+	const header = req.get('Authorization') ?? '';
+	const provided = header.startsWith('Bearer ') ? header.slice(7).trim() : '';
+	return tokenMatches(provided, BUILD_STATS_TOKEN);
+}
+
+app.get('/api/partner', (_req, res) => {
+	const summary = partner?.summary();
+	if (!summary) return res.status(404).json({ error: 'No partner yet' });
+	res.set('Cache-Control', 'public, max-age=120, stale-while-revalidate=60');
+	res.json(summary);
+});
+
+// The URL carries the sprite key (?v=15-a), so it can be cached for a long time: a new species
+// or shiny flag is a new URL.
+app.get('/api/partner/sprite', (_req, res) => {
+	const gif = partner?.sprite();
+	if (!gif) return res.status(404).json({ error: 'No sprite yet' });
+	res.set('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
+	res.type('image/gif').send(gif);
+});
+
+// Replaces the partner (no max-merge: a swap or evolution can lower the level). The answer says
+// whether the sprite is still needed, so the Mac only uploads the gif when it changes.
+app.post('/api/partner', express.json({ limit: '4kb' }), (req, res) => {
+	if (!partner) return res.status(503).json({ error: 'Build stats not enabled' });
+	if (!authorised(req)) return res.status(401).json({ error: 'Unauthorized' });
+
+	const result = validatePartner(req.body);
+	if (!result.ok) return res.status(400).json({ error: result.error });
+
+	try {
+		res.json({ ok: true, ...partner.ingest(result.value) });
+	} catch (err) {
+		console.error('Failed to store partner:', err.message);
+		res.status(500).json({ error: 'Failed to store partner' });
+	}
+});
+
+app.put(
+	'/api/partner/sprite',
+	express.raw({ type: 'image/gif', limit: MAX_SPRITE_LIMIT }),
+	(req, res) => {
+		if (!partner) return res.status(503).json({ error: 'Build stats not enabled' });
+		if (!authorised(req)) return res.status(401).json({ error: 'Unauthorized' });
+		if (!Buffer.isBuffer(req.body) || !isGif(req.body)) {
+			return res.status(400).json({ error: 'body must be a GIF' });
+		}
+		const key = String(req.query.key ?? '');
+		try {
+			if (!partner.setSprite(key, req.body)) {
+				return res.status(409).json({ error: 'key does not match the current partner' });
+			}
+			res.json({ ok: true, bytes: req.body.length });
+		} catch (err) {
+			console.error('Failed to store partner sprite:', err.message);
+			res.status(500).json({ error: 'Failed to store partner sprite' });
+		}
+	}
+);
 
 app.listen(PORT, () => {
 	console.log(`energy-proxy listening on :${PORT}`);

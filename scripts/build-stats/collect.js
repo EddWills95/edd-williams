@@ -246,3 +246,61 @@ export function chunk(list, size) {
 	for (let i = 0; i < list.length; i += size) chunks.push(list.slice(i, i + size));
 	return chunks;
 }
+
+// PokeTokenBar partner. Level is 5 + floor(95 * growthTokens / T), where T is the "graduation
+// total" for the partner's rarity (PokemonProfile.advanceGrowth and PokemonBalance.graduationTotal
+// in github.com/chattymin/poketokenbar). The app never stores the next-level threshold, so it is
+// derived here. A level can sit above what the tokens imply (levels never drop), so progress is
+// clamped to the level's own range by the consumer.
+export const GRADUATION_TOTAL = {
+	common: 750_000_000,
+	uncommon: 1_875_000_000,
+	rare: 3_000_000_000,
+	legendary: 6_000_000_000
+};
+const MIN_LEVEL = 5;
+const MAX_LEVEL = 100;
+
+// Smallest token total that reaches `level`, or undefined for an unknown rarity.
+export function xpForLevel(level, rarity) {
+	const total = GRADUATION_TOTAL[rarity];
+	if (!total) return undefined;
+	if (level <= MIN_LEVEL) return 0;
+	return Math.ceil(((level - MIN_LEVEL) * total) / (MAX_LEVEL - MIN_LEVEL));
+}
+
+/**
+ * Builds the site payload from PokeTokenBar's companion-state.json and the partner species'
+ * details JSON. Returns only what the site shows (no IVs, seed, instance ID, moves or nature),
+ * or null if there is no usable partner (an egg, a missing file or an unexpected shape).
+ */
+export function buildPartner(state, details) {
+	const active = state?.active;
+	const profile = active?.profile;
+	const speciesId = active?.pathIDs?.[active?.stageIndex];
+	const name = details?.details?.name;
+	if (!Number.isSafeInteger(speciesId) || speciesId < 1 || !profile) return null;
+	if (typeof name !== 'string' || !/^[a-z0-9-]{1,40}$/.test(name)) return null;
+	if (!Number.isSafeInteger(profile.level) || profile.level < MIN_LEVEL) return null;
+	if (profile.level > MAX_LEVEL || !Number.isSafeInteger(profile.growthTokens)) return null;
+	if (profile.growthTokens < 0) return null;
+
+	const partner = {
+		speciesId,
+		name,
+		level: profile.level,
+		xp: profile.growthTokens,
+		shiny: active.isShiny === true
+	};
+	const start = xpForLevel(profile.level, active.rarity);
+	if (start !== undefined) {
+		partner.levelStartXp = start;
+		// Level 100 is the cap: there is no next level to fill a bar towards.
+		if (profile.level < MAX_LEVEL)
+			partner.nextLevelXp = xpForLevel(profile.level + 1, active.rarity);
+	}
+	return partner;
+}
+
+// Sprite file name in PokeTokenBar's sprites/ directory: "-sha" is the shiny animated variant.
+export const spriteKey = ({ speciesId, shiny }) => `${speciesId}-${shiny ? 'sha' : 'a'}`;

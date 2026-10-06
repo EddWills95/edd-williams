@@ -3,6 +3,7 @@
 	import { tweened } from 'svelte/motion';
 	import { quartOut } from 'svelte/easing';
 	import { buildStats } from '$lib/live-stats.js';
+	import Partner from './partner.svelte';
 
 	// Its own section: what the person living in the flat has been building. Uses its own
 	// endpoint so a missing or failing build-stats response never touches the energy drawing, and
@@ -152,78 +153,89 @@
 			undeniably more productive
 		</p>
 
-		<div class="build-sheet" bind:this={sheet}>
-			{#if mocked}
-				<p class="mock-flag">Mock data: dev fixture, not real numbers</p>
-			{/if}
+		<!-- One grid cell for the sheet and the partner, so the section keeps its three subgrid rows. -->
+		<div class="build-col">
+			<div class="build-sheet" bind:this={sheet}>
+				{#if mocked}
+					<p class="mock-flag">Mock data: dev fixture, not real numbers</p>
+				{/if}
 
-			<header class="build-head">
-				<div>
-					<h3 id="build-heading" class="build-title">Live from the laptop</h3>
-					<p class="tagline">
-						The flat runs on the sun. The code runs on the sun, tea and a fair amount of AI.
+				<header class="build-head">
+					<div>
+						<h3 id="build-heading" class="build-title">Live from the laptop</h3>
+						<p class="tagline">
+							The flat runs on the sun. The code runs on the sun, tea and a fair amount of AI.
+						</p>
+					</div>
+					<p class="synced">
+						Synced <time class="nums" datetime={asOf.toISOString()}>{syncFormat.format(asOf)}</time
+						>,
+						{ago(now - asOf.getTime())}
 					</p>
-				</div>
-				<p class="synced">
-					Synced <time class="nums" datetime={asOf.toISOString()}>{syncFormat.format(asOf)}</time>,
-					{ago(now - asOf.getTime())}
-				</p>
-			</header>
+				</header>
 
-			{#if stats.stale}
-				<p class="stale-note" role="status">
-					These haven't updated since {syncFormat.format(asOf)}, so they're frozen until the laptop
-					next checks in.
-				</p>
-			{/if}
-
-			<dl class="stats">
-				<div class="stat">
-					<dt class="label">Tokens written</dt>
-					<dd class="today nums">{count(shown.written)} <span class="unit">today</span></dd>
-					<dd class="lifetime"><span class="nums">{big(stats.lifetime.written)}</span> all time</dd>
-					<dd class="caption">{tokenCaption(stats.today.written)}</dd>
-				</div>
-
-				<div class="stat">
-					<dt class="label">Lines added</dt>
-					<dd class="today nums">
-						{count(shown.added)} <span class="unit">today</span>
-					</dd>
-					<dd class="lifetime">
-						<span class="nums">{big(stats.lifetime.linesAdded)}</span> all time
-					</dd>
-					<dd class="caption">{linesCaption(stats.today)}</dd>
-				</div>
-
-				<div class="stat">
-					<dt class="label">Commits</dt>
-					<dd class="today nums">{count(shown.commits)} <span class="unit">today</span></dd>
-					<dd class="lifetime"><span class="nums">{big(stats.lifetime.commits)}</span> all time</dd>
-					<dd class="caption">{commitsCaption(stats.today)}</dd>
-				</div>
-			</dl>
-
-			<div class="notes">
-				<p class="week nums">
-					This week: {big(stats.week.written)} tokens written · {count(stats.week.linesAdded)} lines added,
-					{count(stats.week.linesRemoved)} removed · {count(stats.week.commits)}
-					{stats.week.commits === 1 ? 'commit' : 'commits'}.
-				</p>
-				{#if stats.lifetime.cacheRead > 0}
-					<p class="cache nums">
-						Also read from cache, all time: <strong>{count(stats.lifetime.cacheRead)}</strong>
-						tokens.
-						{cacheCaption(stats.lifetime)}
+				{#if stats.stale}
+					<p class="stale-note" role="status">
+						These haven't updated since {syncFormat.format(asOf)}, so they're frozen until the
+						laptop next checks in.
 					</p>
 				{/if}
-				<p class="footnote">
-					Tokens come from my Claude Code usage; lines and commits from git. Word counts assume
-					about
-					{WORDS_PER_TOKEN} words per token, a novel at {count(NOVEL_WORDS)} words and The Lord of the
-					Rings at about {count(LOTR_WORDS)}.
-				</p>
+
+				<dl class="stats">
+					<div class="stat">
+						<dt class="label">Tokens written</dt>
+						<dd class="today nums">{count(shown.written)} <span class="unit">today</span></dd>
+						<dd class="lifetime">
+							<span class="nums">{big(stats.lifetime.written)}</span> all time
+						</dd>
+						<dd class="caption">{tokenCaption(stats.today.written)}</dd>
+					</div>
+
+					<div class="stat">
+						<dt class="label">Lines added</dt>
+						<dd class="today nums">
+							{count(shown.added)} <span class="unit">today</span>
+						</dd>
+						<dd class="lifetime">
+							<span class="nums">{big(stats.lifetime.linesAdded)}</span> all time
+						</dd>
+						<dd class="caption">{linesCaption(stats.today)}</dd>
+					</div>
+
+					<div class="stat">
+						<dt class="label">Commits</dt>
+						<dd class="today nums">{count(shown.commits)} <span class="unit">today</span></dd>
+						<dd class="lifetime">
+							<span class="nums">{big(stats.lifetime.commits)}</span> all time
+						</dd>
+						<dd class="caption">{commitsCaption(stats.today)}</dd>
+					</div>
+				</dl>
+
+				<div class="notes">
+					<p class="week nums">
+						This week: {big(stats.week.written)} tokens written · {count(stats.week.linesAdded)} lines
+						added,
+						{count(stats.week.linesRemoved)} removed · {count(stats.week.commits)}
+						{stats.week.commits === 1 ? 'commit' : 'commits'}.
+					</p>
+					{#if stats.lifetime.cacheRead > 0}
+						<p class="cache nums">
+							Also read from cache, all time: <strong>{count(stats.lifetime.cacheRead)}</strong>
+							tokens.
+							{cacheCaption(stats.lifetime)}
+						</p>
+					{/if}
+					<p class="footnote">
+						Tokens come from my Claude Code usage; lines and commits from git. Word counts assume
+						about
+						{WORDS_PER_TOKEN} words per token, a novel at {count(NOVEL_WORDS)} words and The Lord of the
+						Rings at about {count(LOTR_WORDS)}.
+					</p>
+				</div>
 			</div>
+
+			<Partner />
 		</div>
 	</section>
 
@@ -231,6 +243,13 @@
 {/if}
 
 <style>
+	.build-col {
+		display: flex;
+		flex-direction: column;
+		align-self: start;
+		width: 100%;
+	}
+
 	/* Plain CSS (no @apply), matching the flat drawing's sheet in balcony-solar.svelte. */
 	.build-sheet {
 		width: 100%;

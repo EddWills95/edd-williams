@@ -106,6 +106,53 @@ export function mockBuildStats(variant) {
 	return Promise.resolve((buildVariants[variant] ?? buildVariants.normal)());
 }
 
+// Partner fixtures for the PokeTokenBar widget, selected with `?mockpartner=<variant>` (or any
+// `?mock=`, which uses `normal`). DEV-ONLY and invented. The sprite is a third-party URL because
+// the real one is served by the proxy.
+//
+//   ?mockpartner=normal   Beedrill part-way through a level
+//   ?mockpartner=nobar    no thresholds known: level and total tokens only
+//   ?mockpartner=maxed    level 100, no next level
+//   ?mockpartner=shiny    shiny, with a long hyphenated name
+//   ?mockpartner=nosprite the gif hasn't been uploaded yet
+//   ?mockpartner=none     404, as in production before the first push (widget hidden)
+
+const SPRITE = 'https://img.pokemondb.net/sprites/black-white/anim/normal/beedrill.gif';
+
+const partnerVariants = {
+	normal: () => ({
+		asOf: minutesAgo(12),
+		stale: false,
+		speciesId: 15,
+		name: 'beedrill',
+		level: 54,
+		xp: 389_103_472,
+		shiny: false,
+		levelStartXp: 386_842_106,
+		nextLevelXp: 394_736_843,
+		spriteUrl: SPRITE
+	}),
+	nobar: () => ({
+		...partnerVariants.normal(),
+		levelStartXp: undefined,
+		nextLevelXp: undefined
+	}),
+	maxed: () => ({
+		...partnerVariants.normal(),
+		level: 100,
+		xp: 750_000_000,
+		levelStartXp: 750_000_000,
+		nextLevelXp: undefined
+	}),
+	shiny: () => ({ ...partnerVariants.normal(), name: 'mr-mime', shiny: true }),
+	nosprite: () => ({ ...partnerVariants.normal(), spriteUrl: null })
+};
+
+export function mockPartner(variant) {
+	if (variant === 'none') return Promise.reject(new Error('mock: 404, no partner yet'));
+	return Promise.resolve((partnerVariants[variant] ?? partnerVariants.normal)());
+}
+
 // History fixtures for the day-in-the-life strip, selected with `?mockhistory=<variant>` (or any
 // `?mock=`, which uses `normal`). DEV-ONLY, invented, and simulated from a simple battery model
 // so the four series stay consistent with each other the way real ones do.
