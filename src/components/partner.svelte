@@ -1,20 +1,14 @@
 <script>
 	import { partnerStats, apiUrl } from '$lib/live-stats.js';
 
-	// The PokeTokenBar partner: the Pokémon whose level climbs as I spend Claude Code tokens.
+	// The PokeTokenBar partner: the Pokémon that grows as I spend Claude Code tokens.
 	// Sits under the Code sheet. Like the build panel it appears only once real data exists (the
 	// endpoint 404s until the first push) and a bad payload counts as no data.
 
 	const isCount = (v) => Number.isSafeInteger(v) && v >= 0;
 
 	function valid(d) {
-		return (
-			d &&
-			typeof d.name === 'string' &&
-			Number.isSafeInteger(d.level) &&
-			isCount(d.xp) &&
-			typeof d.shiny === 'boolean'
-		);
+		return d && typeof d.name === 'string' && isCount(d.xp) && typeof d.shiny === 'boolean';
 	}
 
 	$: partner = valid($partnerStats.data) ? $partnerStats.data : null;
@@ -45,14 +39,20 @@
 		n >= 1e9 ? `${(n / 1e9).toFixed(2)}B` : n >= 1e6 ? `${(n / 1e6).toFixed(1)}M` : count(n);
 
 	$: sprite = partner?.spriteUrl ? apiUrl(partner.spriteUrl) : null;
-	$: label = partner ? `${title(partner.name)}, level ${partner.level}` : '';
+	// Names in the payload are the PokéAPI slugs, which is also how Pokémon Database names pages.
+	$: pokedexUrl = partner
+		? `https://pokemondb.net/pokedex/${encodeURIComponent(partner.name)}`
+		: '';
+	$: label = partner ? title(partner.name) : '';
 </script>
 
 {#if partner}
 	<aside class="partner" aria-label="My PokeTokenBar partner: {label}">
 		<p class="label">
 			<span>Partner Pokémon</span>
-			<span class="nums">#{String(partner.speciesId).padStart(3, '0')}</span>
+			<a class="nums" href={pokedexUrl} target="_blank" rel="noopener noreferrer"
+				>Pokédex #{String(partner.speciesId).padStart(3, '0')}</a
+			>
 		</p>
 
 		<div class="sprite">
@@ -70,8 +70,10 @@
 
 		<div class="body">
 			<p class="name">
-				<span>{title(partner.name)}{partner.shiny ? ' ✨' : ''}</span>
-				<span class="lv nums">Lv {partner.level}</span>
+				<a href={pokedexUrl} target="_blank" rel="noopener noreferrer"
+					>{title(partner.name)}{partner.shiny ? ' ✨' : ''}</a
+				>
+				{#if hasBar}<span class="stage">{stageText}</span>{/if}
 			</p>
 
 			{#if hasBar}
@@ -89,7 +91,7 @@
 					{compact(used)} / {compact(partner.stageThreshold)} · {Math.floor(fraction * 100)}%
 				</p>
 				<p class="meta nums">
-					{stageText} · {compact(partner.stageThreshold - used)}
+					{compact(partner.stageThreshold - used)}
 					{isFinal ? 'to graduation' : 'to next evolution'}
 				</p>
 			{:else}
@@ -101,7 +103,7 @@
 					href="https://github.com/chattymin/poketokenbar"
 					target="_blank"
 					rel="noopener noreferrer">PokeTokenBar</a
-				>). It levels up as I spend Claude Code tokens, so it only grows while I build.
+				>). It grows as I spend Claude Code tokens, so it only evolves while I build.
 			</p>
 		</div>
 
@@ -192,9 +194,23 @@
 		font-variant-numeric: lining-nums tabular-nums;
 	}
 
-	.lv {
+	.stage {
 		color: #f28b72;
 		white-space: nowrap;
+		font-size: 0.875rem;
+	}
+
+	.name a,
+	.label a {
+		color: inherit;
+		text-decoration: none;
+	}
+
+	.name a:hover,
+	.label a:hover {
+		color: #f28b72;
+		text-decoration: underline;
+		text-underline-offset: 2px;
 	}
 
 	.bar {
