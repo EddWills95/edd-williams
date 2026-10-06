@@ -28,15 +28,17 @@ skipping dot-directories such as `.claude/worktrees`, `node_modules`, `vendor`, 
 
 **Partner** (PokeTokenBar), from `~/Library/Application Support/PokeTokenBar/` (read-only, and
 skipped silently if the app isn't there or is showing an egg): the current partner's `name`,
-`level`, `xp` (its `growthTokens`), `shiny` and species ID, plus the level's XP range
-(`levelStartXp`, `nextLevelXp`) so the site can draw a progress bar, and the sprite GIF. Nothing
-else from `companion-state.json` leaves the Mac: no IVs, seed, instance ID, nature or moves.
+`level`, `xp` (its `growthTokens`, shown only if the stage data is missing), `shiny` and species
+ID, plus its evolution-stage progress (`stage`, `stages`, `stageXp`, `stageThreshold`) and the
+sprite GIF. Nothing else from `companion-state.json` leaves the Mac: no IVs, seed, instance ID,
+nature or moves.
 
-The app doesn't store the next-level threshold, so it is derived from the app's own rule (see
-`PokemonProfile.advanceGrowth` upstream): `level = 5 + floor(95 × growthTokens / T)`, where `T` is
-the rarity's total (common 750M, uncommon 1.875B, rare 3B, legendary 6B). Level _n_ starts at
-`ceil((n − 5) / 95 × T)`; level 100 has no next level. It matches the app's saved levels (e.g.
-382,775,174 tokens is Lv 53, 750,000,000 is Lv 100) and is tested in `collect.test.js`.
+The site's bar mirrors the app's own: tokens spent in the current stage (`usedAtStage`) over that
+stage's cost, captioned "to graduation" on the final form and "to next evolution" before it. The
+cost is derived as the app does (`PokemonBalance.phaseThreshold` upstream): a rarity's total `T`
+(common 750M, uncommon 1.875B, rare 3B, legendary 6B) is split across its `k` forms, stage `i`
+costing `T × i / (k(k+1)/2)` (halved for a repeat partner). A common three-form line costs 125M,
+250M and 375M. Tested in `collect.test.js`.
 
 The partner goes to `/api/partner` after the day totals. The proxy answers whether it still needs
 the sprite, so the GIF is uploaded (`PUT /api/partner/sprite`) only when the species or shiny flag

@@ -247,11 +247,12 @@ export function chunk(list, size) {
 	return chunks;
 }
 
-// PokeTokenBar partner. Level is 5 + floor(95 * growthTokens / T), where T is the "graduation
-// total" for the partner's rarity (PokemonProfile.advanceGrowth and PokemonBalance.graduationTotal
-// in github.com/chattymin/poketokenbar). The app never stores the next-level threshold, so it is
-// derived here. A level can sit above what the tokens imply (levels never drop), so progress is
-// clamped to the level's own range by the consumer.
+// PokeTokenBar partner. The app's progress bar is the tokens spent in the current evolution stage
+// (`usedAtStage`) over that stage's cost, and its caption is "X to graduation" on the final form
+// or "X to next evolution" before it (PokemonBalance.phaseThreshold and CompanionStore.progress in
+// github.com/chattymin/poketokenbar). The site mirrors that so the two show the same thing. A
+// rarity's total T is split across its forms k as T * i / (k (k + 1) / 2) for stage i, so later
+// stages cost more.
 export const GRADUATION_TOTAL = {
 	common: 750_000_000,
 	uncommon: 1_875_000_000,
@@ -260,13 +261,16 @@ export const GRADUATION_TOTAL = {
 };
 const MIN_LEVEL = 5;
 const MAX_LEVEL = 100;
+const GROWTH_BOOST = 2; // a repeat partner (hasGrowthBoost) needs half the tokens per stage
 
-// Smallest token total that reaches `level`, or undefined for an unknown rarity.
-export function xpForLevel(level, rarity) {
+// Token cost of the 0-based `stageIndex` of a `forms`-stage line, or undefined for an unknown
+// rarity or impossible stage.
+export function phaseThreshold(rarity, forms, stageIndex, boosted = false) {
 	const total = GRADUATION_TOTAL[rarity];
-	if (!total) return undefined;
-	if (level <= MIN_LEVEL) return 0;
-	return Math.ceil(((level - MIN_LEVEL) * total) / (MAX_LEVEL - MIN_LEVEL));
+	if (!total || !Number.isSafeInteger(forms) || forms < 1) return undefined;
+	if (!Number.isSafeInteger(stageIndex) || stageIndex < 0 || stageIndex >= forms) return undefined;
+	const standard = Math.round((total * (stageIndex + 1)) / ((forms * (forms + 1)) / 2));
+	return Math.max(1, Math.round(standard / (boosted ? GROWTH_BOOST : 1)));
 }
 
 /**
@@ -292,12 +296,21 @@ export function buildPartner(state, details) {
 		xp: profile.growthTokens,
 		shiny: active.isShiny === true
 	};
-	const start = xpForLevel(profile.level, active.rarity);
-	if (start !== undefined) {
-		partner.levelStartXp = start;
-		// Level 100 is the cap: there is no next level to fill a bar towards.
-		if (profile.level < MAX_LEVEL)
-			partner.nextLevelXp = xpForLevel(profile.level + 1, active.rarity);
+	const threshold = phaseThreshold(
+		active.rarity,
+		active.totalForms,
+		active.stageIndex,
+		active.hasGrowthBoost === true
+	);
+	if (
+		threshold !== undefined &&
+		Number.isSafeInteger(active.usedAtStage) &&
+		active.usedAtStage >= 0
+	) {
+		partner.stage = active.stageIndex + 1;
+		partner.stages = active.totalForms;
+		partner.stageXp = active.usedAtStage;
+		partner.stageThreshold = threshold;
 	}
 	return partner;
 }

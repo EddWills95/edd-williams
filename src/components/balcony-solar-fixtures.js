@@ -110,9 +110,9 @@ export function mockBuildStats(variant) {
 // `?mock=`, which uses `normal`). DEV-ONLY and invented. The sprite is a third-party URL because
 // the real one is served by the proxy.
 //
-//   ?mockpartner=normal   Beedrill part-way through a level
-//   ?mockpartner=nobar    no thresholds known: level and total tokens only
-//   ?mockpartner=maxed    level 100, no next level
+//   ?mockpartner=normal   Beedrill, final form, part-way to graduation
+//   ?mockpartner=nobar    no stage data: total tokens only
+//   ?mockpartner=evolving mid-line, so the caption says "to next evolution"
 //   ?mockpartner=shiny    shiny, with a long hyphenated name
 //   ?mockpartner=nosprite the gif hasn't been uploaded yet
 //   ?mockpartner=none     404, as in production before the first push (widget hidden)
@@ -125,24 +125,30 @@ const partnerVariants = {
 		stale: false,
 		speciesId: 15,
 		name: 'beedrill',
-		level: 54,
-		xp: 389_103_472,
+		level: 58,
+		xp: 420_407_077,
 		shiny: false,
-		levelStartXp: 386_842_106,
-		nextLevelXp: 394_736_843,
+		stage: 3,
+		stages: 3,
+		stageXp: 45_407_077,
+		stageThreshold: 375_000_000,
 		spriteUrl: SPRITE
 	}),
 	nobar: () => ({
 		...partnerVariants.normal(),
-		levelStartXp: undefined,
-		nextLevelXp: undefined
+		stage: undefined,
+		stages: undefined,
+		stageXp: undefined,
+		stageThreshold: undefined
 	}),
-	maxed: () => ({
+	evolving: () => ({
 		...partnerVariants.normal(),
-		level: 100,
-		xp: 750_000_000,
-		levelStartXp: 750_000_000,
-		nextLevelXp: undefined
+		name: 'kakuna',
+		speciesId: 14,
+		level: 24,
+		stage: 2,
+		stageXp: 200_000_000,
+		stageThreshold: 250_000_000
 	}),
 	shiny: () => ({ ...partnerVariants.normal(), name: 'mr-mime', shiny: true }),
 	nosprite: () => ({ ...partnerVariants.normal(), spriteUrl: null })

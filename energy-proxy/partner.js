@@ -17,7 +17,7 @@ const isCount = (v) => Number.isSafeInteger(v) && v >= 0 && v <= MAX_XP;
 
 /**
  * Validates a partner POST: { asOf: ISO string, partner: { speciesId, name, level, xp, shiny,
- * levelStartXp?, nextLevelXp? } }. Unknown fields are dropped, not stored.
+ * stage?, stages?, stageXp?, stageThreshold? } }. Unknown fields are dropped, not stored.
  */
 export function validatePartner(body, now = new Date()) {
 	if (!body || typeof body !== 'object') return { ok: false, error: 'body must be an object' };
@@ -43,18 +43,30 @@ export function validatePartner(body, now = new Date()) {
 	if (!isCount(p.xp)) return { ok: false, error: 'xp must be a non-negative integer' };
 	if (typeof p.shiny !== 'boolean') return { ok: false, error: 'shiny must be a boolean' };
 
-	const partner = { speciesId: p.speciesId, name: p.name, level: p.level, xp: p.xp, shiny: p.shiny };
-	for (const key of ['levelStartXp', 'nextLevelXp']) {
-		if (p[key] === undefined || p[key] === null) continue;
-		if (!isCount(p[key])) return { ok: false, error: `${key} must be a non-negative integer` };
-		partner[key] = p[key];
-	}
-	// A bar needs a start below its end; anything else is a malformed pair, not a partial one.
-	if (
-		partner.nextLevelXp !== undefined &&
-		(partner.levelStartXp === undefined || partner.nextLevelXp <= partner.levelStartXp)
-	) {
-		return { ok: false, error: 'nextLevelXp must come with a smaller levelStartXp' };
+	const partner = {
+		speciesId: p.speciesId,
+		name: p.name,
+		level: p.level,
+		xp: p.xp,
+		shiny: p.shiny
+	};
+	// Evolution-stage progress, as the app shows it. All four or none, so a half-sent group can't
+	// draw a nonsense bar.
+	const stageKeys = ['stage', 'stages', 'stageXp', 'stageThreshold'];
+	const sent = stageKeys.filter((key) => p[key] !== undefined && p[key] !== null);
+	if (sent.length > 0) {
+		if (sent.length !== stageKeys.length) {
+			return { ok: false, error: `${stageKeys.join(', ')} must be sent together` };
+		}
+		const smallInt = (v) => Number.isSafeInteger(v) && v >= 1 && v <= 20;
+		if (!smallInt(p.stages) || !smallInt(p.stage) || p.stage > p.stages) {
+			return { ok: false, error: 'stage must be 1..stages, with stages at most 20' };
+		}
+		if (!isCount(p.stageXp)) return { ok: false, error: 'stageXp must be a non-negative integer' };
+		if (!isCount(p.stageThreshold) || p.stageThreshold < 1) {
+			return { ok: false, error: 'stageThreshold must be a positive integer' };
+		}
+		for (const key of stageKeys) partner[key] = p[key];
 	}
 	return { ok: true, value: { asOf: asOf.toISOString(), partner } };
 }

@@ -27,23 +27,17 @@
 			.map((part) => part.charAt(0).toUpperCase() + part.slice(1))
 			.join(' ');
 
-	// Fill is the share of this level's token range already earned; clamped, because the app never
-	// lowers a level, so tokens can briefly sit outside the range the level implies.
+	// The same bar the app shows: tokens spent in the current evolution stage over that stage's
+	// cost. Clamped, as the app does, because usage can briefly overshoot a stage.
 	$: hasBar =
 		partner &&
-		isCount(partner.levelStartXp) &&
-		isCount(partner.nextLevelXp) &&
-		partner.nextLevelXp > partner.levelStartXp;
-	$: fraction = hasBar
-		? Math.min(
-				Math.max(
-					(partner.xp - partner.levelStartXp) / (partner.nextLevelXp - partner.levelStartXp),
-					0
-				),
-				1
-			)
-		: 0;
-	$: maxed = partner && partner.level >= 100;
+		isCount(partner.stageXp) &&
+		Number.isSafeInteger(partner.stageThreshold) &&
+		partner.stageThreshold > 0;
+	$: used = hasBar ? Math.min(partner.stageXp, partner.stageThreshold) : 0;
+	$: fraction = hasBar ? used / partner.stageThreshold : 0;
+	$: isFinal = partner && partner.stage >= partner.stages;
+	$: stageText = isFinal ? 'Final form' : `Stage ${partner?.stage} of ${partner?.stages}`;
 
 	const count = (n) => n.toLocaleString('en-GB');
 	// 389,103,472 -> "389.1M"
@@ -80,24 +74,24 @@
 				<span class="lv nums">Lv {partner.level}</span>
 			</p>
 
-			{#if hasBar && !maxed}
+			{#if hasBar}
 				<div
 					class="bar"
 					role="progressbar"
-					aria-label="Progress to level {partner.level + 1}"
+					aria-label={isFinal ? 'Progress to graduation' : 'Progress to next evolution'}
 					aria-valuemin="0"
 					aria-valuemax="100"
-					aria-valuenow={Math.round(fraction * 100)}
+					aria-valuenow={Math.floor(fraction * 100)}
 				>
 					<span class="fill" style="width: {fraction * 100}%"></span>
 				</div>
 				<p class="meta nums">
-					{compact(partner.xp - partner.levelStartXp)} / {compact(
-						partner.nextLevelXp - partner.levelStartXp
-					)} XP to Lv {partner.level + 1}
+					{compact(used)} / {compact(partner.stageThreshold)} · {Math.floor(fraction * 100)}%
 				</p>
-			{:else if maxed}
-				<p class="meta nums">Max level · {compact(partner.xp)} tokens</p>
+				<p class="meta nums">
+					{stageText} · {compact(partner.stageThreshold - used)}
+					{isFinal ? 'to graduation' : 'to next evolution'}
+				</p>
 			{:else}
 				<p class="meta nums">{compact(partner.xp)} tokens</p>
 			{/if}

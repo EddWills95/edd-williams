@@ -176,17 +176,20 @@ and `partner_sprite`), and only enabled when build stats are. Code is in `partne
 	"partner": {
 		"speciesId": 15,
 		"name": "beedrill",
-		"level": 54,
-		"xp": 389103472,
+		"level": 58,
+		"xp": 420407077,
 		"shiny": false,
-		"levelStartXp": 386842106,
-		"nextLevelXp": 394736843
+		"stage": 3,
+		"stages": 3,
+		"stageXp": 45407077,
+		"stageThreshold": 375000000
 	}
 }
 ```
 
-`levelStartXp` and `nextLevelXp` are optional (no bar without them; `nextLevelXp` is omitted at
-level 100). Unknown fields are dropped. The reply is `{ "ok": true, "applied": true,
+`stage`, `stages`, `stageXp` and `stageThreshold` are the partner's progress through its current
+evolution stage, as the app shows it. They are optional but must be sent together (without them
+the site shows total `xp` instead of a bar). Unknown fields are dropped. The reply is `{ "ok": true, "applied": true,
 "needsSprite": true }`: `needsSprite` is true until a GIF is stored for this species and shiny
 flag.
 
@@ -204,11 +207,13 @@ base64 in the JSON because that keeps the JSON tiny and the image cacheable.
 	"stale": false,
 	"speciesId": 15,
 	"name": "beedrill",
-	"level": 54,
-	"xp": 389103472,
+	"level": 58,
+	"xp": 420407077,
 	"shiny": false,
-	"levelStartXp": 386842106,
-	"nextLevelXp": 394736843,
+	"stage": 3,
+	"stages": 3,
+	"stageXp": 45407077,
+	"stageThreshold": 375000000,
 	"spriteUrl": "/api/partner/sprite?v=15-a"
 }
 ```

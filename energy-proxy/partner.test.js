@@ -9,11 +9,13 @@ const NOW = new Date('2026-10-06T12:00:00Z');
 const partner = (patch = {}) => ({
 	speciesId: 15,
 	name: 'beedrill',
-	level: 53,
-	xp: 383_717_301,
+	level: 58,
+	xp: 420_407_077,
 	shiny: false,
-	levelStartXp: 378_947_369,
-	nextLevelXp: 386_842_106,
+	stage: 3,
+	stages: 3,
+	stageXp: 45_407_077,
+	stageThreshold: 375_000_000,
 	...patch
 });
 const push = (p = partner(), asOf = '2026-10-06T11:00:00Z') => ({ asOf, partner: p });
@@ -30,16 +32,21 @@ function withDb(fn) {
 	}
 }
 
-test('validatePartner accepts a good push, with or without thresholds', () => {
+test('validatePartner accepts a good push, with or without stage progress', () => {
 	assert.equal(validatePartner(push(), NOW).ok, true);
 	const bare = validatePartner(
-		push(partner({ levelStartXp: undefined, nextLevelXp: undefined })),
+		push(
+			partner({
+				stage: undefined,
+				stages: undefined,
+				stageXp: undefined,
+				stageThreshold: undefined
+			})
+		),
 		NOW
 	);
 	assert.equal(bare.ok, true);
-	assert.equal('nextLevelXp' in bare.value.partner, false);
-	// Level 100 has a start but no next level.
-	assert.equal(validatePartner(push(partner({ level: 100, nextLevelXp: undefined })), NOW).ok, true);
+	assert.equal('stageThreshold' in bare.value.partner, false);
 });
 
 test('validatePartner rejects bad input', () => {
@@ -58,9 +65,13 @@ test('validatePartner rejects bad input', () => {
 		push(partner({ xp: -1 })),
 		push(partner({ xp: '5' })),
 		push(partner({ shiny: 'yes' })),
-		push(partner({ nextLevelXp: 1.5 })),
-		push(partner({ nextLevelXp: 100, levelStartXp: 200 })),
-		push(partner({ levelStartXp: undefined }))
+		push(partner({ stageXp: 1.5 })),
+		push(partner({ stageXp: -1 })),
+		push(partner({ stageThreshold: 0 })),
+		push(partner({ stage: 4 })), // beyond stages
+		push(partner({ stage: 0 })),
+		push(partner({ stages: 99, stage: 1 })),
+		push(partner({ stageThreshold: undefined })) // a half-sent group
 	];
 	for (const body of bad) assert.equal(validatePartner(body, NOW).ok, false);
 });
@@ -130,7 +141,9 @@ test('a sprite is only accepted for the current partner, and old sprites are pru
 		assert.equal(store.setSprite('15-sha', GIF), false); // not the current key
 		assert.equal(store.setSprite('15-a', GIF), true);
 
-		store.ingest(validatePartner(push(partner({ shiny: true }), '2026-10-06T11:10:00Z'), NOW).value);
+		store.ingest(
+			validatePartner(push(partner({ shiny: true }), '2026-10-06T11:10:00Z'), NOW).value
+		);
 		assert.equal(store.sprite(), null); // shiny variant not uploaded yet
 		const other = Buffer.concat([GIF, Buffer.from('x')]);
 		assert.equal(store.setSprite('15-sha', other), true);

@@ -10,9 +10,9 @@ import {
 	mergeDays,
 	parseGitLog,
 	resolveRenamedPath,
+	phaseThreshold,
 	spriteKey,
-	totals,
-	xpForLevel
+	totals
 } from './collect.js';
 
 const fixture = (name) => readFileSync(new URL(`./fixtures/${name}`, import.meta.url), 'utf8');
@@ -174,13 +174,15 @@ const companionState = (patch = {}, profilePatch = {}) => ({
 	active: {
 		pathIDs: [13, 14, 15],
 		stageIndex: 2,
+		totalForms: 3,
 		isShiny: false,
+		hasGrowthBoost: false,
 		rarity: 'common',
 		nature: 'impish',
-		usedAtStage: 8717301,
+		usedAtStage: 45_407_077,
 		profile: {
-			level: 53,
-			growthTokens: 383_717_301,
+			level: 58,
+			growthTokens: 420_407_077,
 			seed: 123456789,
 			instanceID: 'B89C00B7-8AF9-4DB5-859C-8CB48E004944',
 			ivs: { hp: 29 },
@@ -192,38 +194,48 @@ const companionState = (patch = {}, profilePatch = {}) => ({
 });
 const beedrill = { details: { name: 'beedrill', speciesID: 15 } };
 
-test('partner: level curve matches the app (known data points)', () => {
-	// level = 5 + floor(95 * tokens / 750M) for a common; both the user's earlier and current reading.
-	for (const tokens of [382_775_174, 383_717_301]) {
-		const level = buildPartner(companionState({}, { growthTokens: tokens }), beedrill).level;
-		assert.equal(5 + Math.floor((95 * tokens) / 750_000_000), level);
-	}
-	assert.equal(xpForLevel(100, 'common'), 750_000_000);
-	assert.equal(xpForLevel(5, 'common'), 0);
-	assert.equal(xpForLevel(100, 'legendary'), 6_000_000_000);
-	assert.equal(xpForLevel(53, 'unheard-of'), undefined);
+test('partner: stage cost matches the app (T * i / (k(k+1)/2), halved when boosted)', () => {
+	// A 3-form common line costs 125M, 250M and 375M, summing to the 750M graduation total.
+	assert.equal(phaseThreshold('common', 3, 0), 125_000_000);
+	assert.equal(phaseThreshold('common', 3, 1), 250_000_000);
+	assert.equal(phaseThreshold('common', 3, 2), 375_000_000);
+	assert.equal(phaseThreshold('common', 1, 0), 750_000_000);
+	assert.equal(phaseThreshold('common', 3, 2, true), 187_500_000);
+	assert.equal(phaseThreshold('legendary', 2, 1), 4_000_000_000);
+	assert.equal(phaseThreshold('unheard-of', 3, 0), undefined);
+	assert.equal(phaseThreshold('common', 3, 3), undefined);
+	assert.equal(phaseThreshold('common', 0, 0), undefined);
 });
 
-test('partner: thresholds bracket the current tokens', () => {
-	const partner = buildPartner(companionState(), beedrill);
-	assert.equal(partner.levelStartXp, 378_947_369);
-	assert.equal(partner.nextLevelXp, 386_842_106);
-	assert.ok(partner.levelStartXp <= partner.xp && partner.xp < partner.nextLevelXp);
-	// The boundary token itself is the first of the next level.
-	assert.equal(5 + Math.floor((95 * partner.nextLevelXp) / 750_000_000), 54);
-	assert.equal(5 + Math.floor((95 * (partner.nextLevelXp - 1)) / 750_000_000), 53);
+test('partner: stage progress mirrors the app (331.5M to graduation at 43.5M used)', () => {
+	const partner = buildPartner(companionState({ usedAtStage: 43_500_000 }), beedrill);
+	assert.equal(partner.stageThreshold - partner.stageXp, 331_500_000);
+	assert.equal(partner.stage, 3);
+	assert.equal(partner.stages, 3);
 });
 
 test('partner: sends only the whitelisted fields', () => {
 	const partner = buildPartner(companionState(), beedrill);
 	assert.deepEqual(
 		Object.keys(partner).sort(),
-		['levelStartXp', 'level', 'name', 'nextLevelXp', 'shiny', 'speciesId', 'xp'].sort()
+		[
+			'level',
+			'name',
+			'shiny',
+			'speciesId',
+			'stage',
+			'stageThreshold',
+			'stageXp',
+			'stages',
+			'xp'
+		].sort()
 	);
 	const text = JSON.stringify(partner);
 	for (const secret of ['seed', 'instanceID', 'ivs', 'B89C00B7', 'impish', 'agility']) {
 		assert.equal(text.includes(secret), false);
 	}
+	assert.equal(partner.level, 58);
+	assert.equal(partner.xp, 420_407_077);
 });
 
 test('partner: species comes from pathIDs[stageIndex]; shiny only when exactly true', () => {
@@ -234,17 +246,13 @@ test('partner: species comes from pathIDs[stageIndex]; shiny only when exactly t
 	assert.equal(spriteKey({ speciesId: 15, shiny: true }), '15-sha');
 });
 
-test('partner: level 100 has no next level; unknown rarity has no thresholds', () => {
-	const maxed = buildPartner(
-		companionState({}, { level: 100, growthTokens: 750_000_000 }),
-		beedrill
-	);
-	assert.equal(maxed.nextLevelXp, undefined);
-	assert.equal(maxed.levelStartXp, 750_000_000);
-	const odd = buildPartner(companionState({ rarity: 'mythic' }), beedrill);
-	assert.equal(odd.levelStartXp, undefined);
-	assert.equal(odd.nextLevelXp, undefined);
-	assert.equal(odd.xp, 383_717_301);
+test('partner: an unknown rarity or missing stage data sends no stage fields', () => {
+	for (const patch of [{ rarity: 'mythic' }, { totalForms: undefined }, { usedAtStage: -1 }]) {
+		const partner = buildPartner(companionState(patch), beedrill);
+		assert.equal('stageThreshold' in partner, false);
+		assert.equal('stage' in partner, false);
+		assert.equal(partner.xp, 420_407_077);
+	}
 });
 
 test('partner: null for an egg, bad names and malformed state', () => {
