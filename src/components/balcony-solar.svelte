@@ -75,10 +75,14 @@
 			}
 		: stats;
 
+	// Savings are net and can dip below zero, so keep the sign in front of the pound sign.
+	const pounds = (/** @type {number} */ n) => `${n < 0 ? '-' : ''}£${Math.abs(n).toFixed(2)}`;
+
 	$: hasSolarNow = isNum(view?.solarPowerW);
 	$: hasHouse = isNum(view?.housePowerW);
 	$: hasGrid = isNum(view?.gridPowerW);
 	$: hasSavingsToday = isNum(view?.batterySavingsToday);
+	$: hasSavingsTotal = isNum(view?.batterySavingsTotal);
 	$: hasTea = isNum(view?.kettleCupsToday);
 	$: batteryMoving =
 		isNum(view?.batteryPowerW) &&
@@ -222,14 +226,21 @@
 					</p>
 				{/if}
 
-				<div class="cell cell-feature">
-					<span class="label">Saved by the battery</span>
-					<span class="big nums">£{stats.batterySavingsTotal.toFixed(2)}</span>
-					<span class="detail nums">
-						{#if hasSavingsToday}£{stats.batterySavingsToday.toFixed(2)} of it today{:else}since it
-							went in{/if}
-					</span>
-				</div>
+				{#if hasSavingsTotal}
+					<div class="cell cell-feature">
+						<span class="label">Net saved by the battery</span>
+						<span class="big nums">{pounds(stats.batterySavingsTotal)}</span>
+						<span class="detail nums">
+							{#if hasSavingsToday}{pounds(stats.batterySavingsToday)} of it today{:else}running
+								total{/if}
+						</span>
+					</div>
+				{:else if hasSavingsToday}
+					<div class="cell cell-feature">
+						<span class="label">Net saved by the battery today</span>
+						<span class="big nums">{pounds(stats.batterySavingsToday)}</span>
+					</div>
+				{/if}
 
 				<div class="cell">
 					<span class="label">Solar, all time</span>

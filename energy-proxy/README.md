@@ -39,6 +39,7 @@ must treat them as possibly absent.
 | `housePowerW`         | House consumption right now, W                                  | `HA_ENTITY_HOUSE_POWER`   |
 | `gridPowerW`          | Grid power right now, W — positive importing, negative exporting | `HA_ENTITY_GRID_POWER`    |
 | `batterySavingsToday` | Battery-system savings today, £                                 | `HA_ENTITY_SAVINGS_TODAY` |
+| `batterySavingsTotal` | Lifetime battery savings, £ (omitted unless configured; pence or GBP) | `HA_ENTITY_SAVINGS_TOTAL` |
 | `kettleCupsToday`     | Cups of tea today: one per kettle boil                          | `HA_ENTITY_KETTLE_CUPS`   |
 | `kettleBoilsToday`    | Kettle boils today (power spikes above 1 kW)                    | `HA_ENTITY_KETTLE_BOILS`  |
 

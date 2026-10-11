@@ -4,7 +4,6 @@ import { mapStats, batteryActionFor } from './map-stats.js';
 
 const state = (value) => ({ state: String(value) });
 const required = (power) => ({
-	batterySavingsTotalPence: state(0),
 	solarGenerationTotalKwh: state(0),
 	solarGenerationTodayKwh: state(0),
 	batterySoc: state(69),
@@ -30,4 +29,14 @@ test('trickle power counts as holding', () => {
 
 test('no reading gives no action', () => {
 	assert.equal(batteryActionFor(NaN), null);
+});
+
+test('lifetime savings is omitted unless configured, and read in pence or GBP', () => {
+	assert.equal('batterySavingsTotal' in mapStats(required(0)), false);
+	const pence = mapStats(required(0), { batterySavingsTotal: state(6025) });
+	assert.equal(pence.batterySavingsTotal, 60.25);
+	const gbp = mapStats(required(0), {
+		batterySavingsTotal: { state: '60.25', attributes: { unit_of_measurement: 'GBP' } }
+	});
+	assert.equal(gbp.batterySavingsTotal, 60.25);
 });

@@ -32,7 +32,6 @@ console.log(
 
 // entity_id -> the key it maps to in the response payload
 const ENTITIES = {
-	batterySavingsTotalPence: 'sensor.battery_system_value_total',
 	solarGenerationTotalKwh: 'sensor.stream_ac_pro_0388_solar_generation_energy',
 	solarGenerationTodayKwh: 'sensor.stream_ac_pro_0388_solar_generation_today',
 	batterySoc: 'sensor.combined_battery_soc',
@@ -66,6 +65,7 @@ const OPTIONAL_ENTITY_ENV = {
 	housePowerW: 'HA_ENTITY_HOUSE_POWER',
 	gridPowerW: 'HA_ENTITY_GRID_POWER',
 	batterySavingsToday: 'HA_ENTITY_SAVINGS_TODAY',
+	batterySavingsTotal: 'HA_ENTITY_SAVINGS_TOTAL',
 	kettleCupsToday: 'HA_ENTITY_KETTLE_CUPS',
 	kettleBoilsToday: 'HA_ENTITY_KETTLE_BOILS'
 };

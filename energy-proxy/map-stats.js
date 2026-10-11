@@ -56,7 +56,6 @@ export function mapStats(required, optional = {}, options = {}) {
 
 	// Existing fields: unchanged shape and rounding, so the live site keeps working as-is.
 	const stats = {
-		batterySavingsTotal: Number((Number(raw('batterySavingsTotalPence')) / 100).toFixed(2)),
 		solarGenerationTotalKwh: Number(Number(raw('solarGenerationTotalKwh')).toFixed(1)),
 		solarGenerationTodayKwh: Number(Number(raw('solarGenerationTodayKwh')).toFixed(2)),
 		batterySoc: Number(Number(raw('batterySoc')).toFixed(1)),
@@ -78,6 +77,11 @@ export function mapStats(required, optional = {}, options = {}) {
 	if (gridPowerW !== null) {
 		stats.gridPowerW = options.gridExportIsPositive ? -gridPowerW : gridPowerW;
 	}
+
+	// Lifetime savings has no sensor of its own since the savings rebuild; wire one up via
+	// HA_ENTITY_SAVINGS_TOTAL if it comes back (pence or GBP, detected from the unit).
+	const batterySavingsTotal = readPounds(optional.batterySavingsTotal);
+	if (batterySavingsTotal !== null) stats.batterySavingsTotal = batterySavingsTotal;
 
 	const batterySavingsToday = readPounds(optional.batterySavingsToday);
 	if (batterySavingsToday !== null) stats.batterySavingsToday = batterySavingsToday;
