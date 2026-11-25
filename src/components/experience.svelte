@@ -4,17 +4,16 @@
 
 	const options = [
 		{
-			id: 'self-employed',
+			id: 'prodigies',
 			dates: '2026 – Present',
-			buttonText: 'Self Employed',
+			buttonText: 'Prodigies',
 			image: '',
 			imageAlt: '',
-			title: 'Self Employed',
-			tagline: 'Inventing Mostly',
+			title: 'Prodigies',
+			tagline: 'Founding Engineer',
 			link: { text: 'inventing-mostly.com', url: 'https://inventing-mostly.com' },
 			client: {
 				name: 'Prodigies',
-				role: 'Founding Engineer',
 				wordmark: { viewBox: '0 0 125 32', path: WORDMARK_PRODIGIES },
 				url: 'https://prodigiesofficial.com',
 				description:
