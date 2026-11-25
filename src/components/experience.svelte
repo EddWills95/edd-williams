@@ -14,10 +14,13 @@
 			link: { text: 'inventing-mostly.com', url: 'https://inventing-mostly.com' },
 			client: {
 				name: 'Prodigies',
+				role: 'Founding Engineer',
 				wordmark: { viewBox: '0 0 125 32', path: WORDMARK_PRODIGIES },
 				url: 'https://prodigiesofficial.com',
 				description:
 					'A creative talent platform connecting designers, photographers, illustrators and other creatives with brands and agencies through profiles, portfolios, messaging and paid project briefs.',
+				summary:
+					'I build the whole platform end to end: the portfolios creatives publish, the AI brief chat brands use to describe a job, and the matching that connects the two.',
 				highlights: [
 					'Rebuilding the platform back end, migrating from Directus to Supabase',
 					'Working across the Next.js and React front end alongside the new back end'
@@ -29,8 +32,8 @@
 			id: 'wise',
 			dates: '2026',
 			buttonText: 'Wise',
-			image: '',
-			imageAlt: '',
+			image: './wise.webp',
+			imageAlt: 'wise logo',
 			title: 'Wise',
 			tagline: 'Senior Frontend Engineer',
 			highlights: [
@@ -248,9 +251,15 @@
 											{/if}
 										</a>
 									</h5>
+									{#if option.client.role}
+										<p class="mb-2 italic">{option.client.role}</p>
+									{/if}
 									<p class="text-base text-pale-cerulean">{option.client.description}</p>
 								</div>
 							</div>
+							{#if option.client.summary}
+								<p class="leading-snug">{option.client.summary}</p>
+							{/if}
 							<ul class="flex flex-col gap-2">
 								{#each option.client.highlights as highlight}
 									<li class="flex gap-3 leading-snug">
