@@ -11,21 +11,21 @@
 			imageAlt: '',
 			title: 'Prodigies',
 			tagline: 'Founding Engineer',
-			link: { text: 'inventing-mostly.com', url: 'https://inventing-mostly.com' },
-			client: {
-				name: 'Prodigies',
+			logo: {
 				wordmark: { viewBox: '0 0 125 32', path: WORDMARK_PRODIGIES },
 				url: 'https://prodigiesofficial.com',
-				description:
-					'A creative talent platform connecting designers, photographers, illustrators and other creatives with brands and agencies through profiles, portfolios, messaging and paid project briefs.',
-				summary:
-					'I build the whole platform end to end: the portfolios creatives publish, the AI brief chat brands use to describe a job, and the matching that connects the two.',
-				highlights: [
-					'Rebuilding the platform back end, migrating from Directus to Supabase',
-					'Working across the Next.js and React front end alongside the new back end'
-				],
-				tech: ['Next.js', 'React', 'TypeScript', 'Supabase', 'Directus', 'Tailwind CSS']
-			}
+				label: 'Prodigies website'
+			},
+			description:
+				'A creative talent platform connecting designers, photographers, illustrators and other creatives with brands and agencies through profiles, portfolios, messaging and paid project briefs.',
+			summary:
+				'I build the whole platform end to end: the portfolios creatives publish, the AI brief chat brands use to describe a job, and the matching that connects the two.',
+			highlights: [
+				'Building the AI brief chat brands use to describe a job, and the matching that connects briefs with creatives',
+				'Rebuilding the platform back end, migrating from Directus to Supabase',
+				'Working across the Next.js and React front end, including the portfolios creatives publish'
+			],
+			tech: ['Next.js', 'React', 'TypeScript', 'Supabase', 'Directus', 'Tailwind CSS']
 		},
 		{
 			id: 'wise',
@@ -204,6 +204,27 @@
 									loading="lazy"
 								/>
 							</div>
+						{:else if option.logo}
+							<a
+								class="offset-border shrink-0"
+								href={option.logo.url}
+								target="_blank"
+								rel="noopener noreferrer"
+								aria-label={option.logo.label}
+							>
+								<span
+									class="flex h-16 w-16 items-center justify-center rounded-sm bg-black text-white sm:h-20 sm:w-20"
+								>
+									<svg
+										class="w-4/5 h-auto"
+										viewBox={option.logo.wordmark.viewBox}
+										aria-hidden="true"
+										focusable="false"
+									>
+										<path fill="currentColor" d={option.logo.wordmark.path}></path>
+									</svg>
+								</span>
+							</a>
 						{/if}
 						<div class="min-w-0">
 							<h3 class="text-2xl sm:text-3xl leading-tight">{option.title}</h3>
@@ -212,74 +233,15 @@
 							</p>
 						</div>
 					</header>
-					{#if option.link}
-						<p class="text-base">
-							More of what I build at
-							<a
-								class="underline text-bdazzled-blue-100"
-								href={option.link.url}
-								target="_blank"
-								rel="noopener noreferrer">{option.link.text}</a
-							>
-						</p>
-					{/if}
-					{#if option.client}
-						<section class="flex flex-col gap-4 rounded border-2 border-pale-cerulean/30 p-4">
-							<div class="flex items-start gap-4">
-								<div>
-									<h4 class="text-sm uppercase tracking-widest text-burnt-sienna-400">Client</h4>
-									<h5 class="text-2xl">
-										<a
-											class="hover:text-burnt-sienna-400 transition-colors"
-											href={option.client.url}
-											target="_blank"
-											rel="noopener noreferrer"
-											aria-label={option.client.name}
-										>
-											{#if option.client.wordmark}
-												<svg
-													class="h-7 w-auto"
-													viewBox={option.client.wordmark.viewBox}
-													aria-hidden="true"
-													focusable="false"
-												>
-													<path fill="currentColor" d={option.client.wordmark.path}></path>
-												</svg>
-											{:else}
-												{option.client.name}
-											{/if}
-										</a>
-									</h5>
-									{#if option.client.role}
-										<p class="mb-2 italic">{option.client.role}</p>
-									{/if}
-									<p class="text-base text-pale-cerulean">{option.client.description}</p>
-								</div>
-							</div>
-							{#if option.client.summary}
-								<p class="leading-snug">{option.client.summary}</p>
+					{#if option.description || option.summary}
+						<div class="flex flex-col gap-3">
+							{#if option.description}
+								<p class="text-base text-pale-cerulean">{option.description}</p>
 							{/if}
-							<ul class="flex flex-col gap-2">
-								{#each option.client.highlights as highlight}
-									<li class="flex gap-3 leading-snug">
-										<span
-											aria-hidden="true"
-											class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-burnt-sienna-400"
-										></span>
-										<span>{highlight}</span>
-									</li>
-								{/each}
-							</ul>
-							<ul class="flex flex-wrap gap-2">
-								{#each option.client.tech as tech}
-									<li
-										class="rounded-full border border-pale-cerulean/60 bg-bdazzled-blue-500/30 px-3 py-0.5 text-sm"
-									>
-										{tech}
-									</li>
-								{/each}
-							</ul>
-						</section>
+							{#if option.summary}
+								<p class="leading-snug">{option.summary}</p>
+							{/if}
+						</div>
 					{/if}
 					{#if option.highlights?.length}
 						<section>

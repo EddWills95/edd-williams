@@ -54,7 +54,7 @@
 			<h1 id="banner-heading" class="hero-title fade-up">
 				<span class="block text-burnt-sienna-400">Edd Williams</span>
 				<span class="block text-light-cyan"
-					>Software engineer. Solar and batteries on the side.</span
+					>Founding engineer at Prodigies. Solar and batteries on the side.</span
 				>
 			</h1>
 
